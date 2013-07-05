@@ -30,13 +30,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 
-import cascading.cascade.Cascade;
-import cascading.flow.Flow;
-import cascading.flow.hadoop.HadoopFlowConnector;
-import cascading.flow.planner.PlannerException;
-import cascading.pipe.Pipe;
-import cascading.property.AppProps;
-import cascading.tap.Tap;
 import multitool.factory.CoGroupFactory;
 import multitool.factory.ConcatFactory;
 import multitool.factory.CountFactory;
@@ -62,22 +55,32 @@ import multitool.factory.SumFactory;
 import multitool.factory.TapFactory;
 import multitool.factory.UniqueFactory;
 import multitool.util.Version;
+
 import org.apache.hadoop.io.compress.GzipCodec;
-import org.apache.hadoop.mapred.ClusterStatus;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cascading.cascade.Cascade;
+import cascading.flow.Flow;
+import cascading.flow.hadoop.HadoopFlowConnector;
+import cascading.flow.planner.PlannerException;
+import cascading.pipe.Pipe;
+import cascading.property.AppProps;
+import cascading.tap.Tap;
+
 /**
- *
+ * Main class of multitool.
  */
 public class Main
   {
   private static final Logger LOG = LoggerFactory.getLogger( Main.class );
 
+  private static final String DEFAULT_JOB_NAME = "multitool";
+  
+  /** Factories for cascading taps. */
   static TapFactory[] TAP_FACTORIES = new TapFactory[]{new SourceFactory( "source" ), new SinkFactory( "sink" )};
 
+  /** Factories foor cascading pipes. */
   static PipeFactory[] PIPE_FACTORIES = new PipeFactory[]{new RejectFactory( "reject" ), new SelectFactory( "select" ),
                                                           new CutFactory( "cut" ), new ParserFactory( "parse" ),
                                                           new RetainFactory( "retain" ),
@@ -102,6 +105,8 @@ public class Main
     optionMap.put( "--help", new Option( "--help", false, null ) );
     optionMap.put( "--markdown", new Option( "--markdown", false, null ) );
     optionMap.put( "--dot", new Option( "--dot", true, null ) );
+    optionMap.put( "--appname", new Option( "--appname", true, null ) );
+
 
     for( Factory factory : TAP_FACTORIES )
       {
@@ -129,35 +134,35 @@ public class Main
       {
       for( String arg : args )
         {
-        String arg_name = arg;
-        String arg_verb = arg;
-        String arg_data = null;
+        String argName = arg;
+        String argVerb = arg;
+        String argData = null;
 
         int equals_index = arg.indexOf( "=" );
 
         if( equals_index != -1 )
           {
-          arg_name = arg.substring( 0, equals_index );
-          arg_verb = arg.substring( 0, equals_index );
-          arg_data = arg.substring( equals_index + 1 );
+          argName = arg.substring( 0, equals_index );
+          argVerb = arg.substring( 0, equals_index );
+          argData = arg.substring( equals_index + 1 );
           }
 
-        int dot_index = arg_name.indexOf( "." );
+        int dotIndex = argName.indexOf( "." );
 
-        if( dot_index != -1 )
-          arg_name = arg_name.substring( 0, dot_index );
+        if( dotIndex != -1 )
+          argName = argName.substring( 0, dotIndex );
 
         if( arg.startsWith( "-" ) )
           {
-          if( optionMap.keySet().contains( arg_name ) && optionMap.get( arg_name ).isValid( arg_verb, arg_data ) )
-            options.put( arg_verb, arg_data );
+          if( optionMap.keySet().contains( argName ) && optionMap.get( argName ).isValid( argVerb, argData ) )
+            options.put( argVerb, argData );
           else
             throw new IllegalArgumentException( "error: incorrect option or usage: " + arg );
           }
         else
           {
-          if( optionMap.keySet().contains( arg_name ) )
-            params.add( new String[]{arg_verb, arg_data} );
+          if( optionMap.keySet().contains( argName ) )
+            params.add( new String[]{argVerb, argData} );
           else
             throw new IllegalArgumentException( "error: incorrect parameter or usage: " + arg );
           }
@@ -197,6 +202,7 @@ public class Main
     printSubHeading( gen_markdown, "options:" );
     printTableRow( gen_markdown, "-h|--help", "show this help text" );
     printTableRow( gen_markdown, "--markdown", "generate help text as GitHub Flavored Markdown" );
+    printTableRow( gen_markdown, "--appname=name", "set cascading application name" );
     printTableRow( gen_markdown, "--dot=filename", "write a plan DOT file, then exit" );
     printSubHeading( gen_markdown, "taps:" );
     printFactoryUsage( gen_markdown, TAP_FACTORIES );
@@ -333,42 +339,23 @@ public class Main
 
     AppProps.addApplicationFramework( properties, Version.MULTITOOL + ":" + Version.getReleaseFull() );
 
-//    int trackers = getNumTaskTrackers();
-//    properties.setProperty( "mapred.map.tasks", "" );
-//    properties.setProperty( "mapred.reduce.tasks", "" );
-
     return properties;
     }
 
-  private int getNumTaskTrackers()
-    {
-    ClusterStatus status = null;
 
-    try
-      {
-      status = new JobClient( new JobConf() ).getClusterStatus();
-      }
-    catch( IOException exception )
-      {
-      LOG.warn( "failed getting cluster status", exception );
 
-      return 1;
-      }
-
-    return status.getTaskTrackers();
-    }
-
+  @SuppressWarnings("rawtypes")
   public void execute()
     {
-    String dot_key = "--dot";
+    String dotKey = "--dot";
 
     try
       {
       Flow flow = plan( getDefaultProperties() );
       Version.printBanner();
-      if( options.containsKey( dot_key ) )
+      if( options.containsKey( dotKey ) )
         {
-        String dot_file = options.get( dot_key );
+        String dot_file = options.get( dotKey );
         flow.writeDOT( dot_file );
         System.out.println( "wrote DOT file to: " + dot_file );
         System.out.println( "exiting" );
@@ -380,19 +367,20 @@ public class Main
       }
     catch( PlannerException exception )
       {
-      if( options.containsKey( dot_key ) )
+      if( options.containsKey( dotKey ) )
         {
-        String dot_file = options.get( dot_key );
+        String dotFileName = options.get( dotKey );
 
-        exception.writeDOT( dot_file );
-        System.out.println( "wrote DOT file to: " + dot_file );
+        exception.writeDOT( dotFileName );
+        System.out.println( "wrote DOT file to: " + dotFileName );
         }
 
       throw exception;
       }
     }
 
-  public Flow plan( Properties properties )
+  @SuppressWarnings("rawtypes")
+public Flow plan( Properties properties )
     {
     Map<String, Pipe> pipes = new HashMap<String, Pipe>();
     Map<String, Tap> sources = new HashMap<String, Tap>();
@@ -436,6 +424,10 @@ public class Main
     if( sinks.isEmpty() )
       throw new IllegalArgumentException( "error: must have one sink" );
 
+    String appnameOption = "--appname";
+    if (optionMap.containsKey( appnameOption ))
+      AppProps.setApplicationName( properties, options.get( appnameOption ));
+    
     return new HadoopFlowConnector( properties ).connect( "multitool", sources, sinks, currentPipe );
     }
 

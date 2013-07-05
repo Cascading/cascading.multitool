@@ -9,3 +9,6 @@ dist
 .gradle
 *.sw[a-z]
 aws.properties
+.settings
+.project
+.classpath

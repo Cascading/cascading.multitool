@@ -36,6 +36,13 @@ idea {
   }
 }
 
+eclipse {
+    classpath{
+        plusConfigurations += configurations.providedCompile
+    }
+}
+
+
 javadoc {
   classpath += configurations.providedCompile
 }

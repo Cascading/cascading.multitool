@@ -116,16 +116,9 @@ To build Multitool, you may download the source code from GitHub:
 
    https://github.com/cascading/cascading.multitool
 
-This release will pull all dependencies from the relevant maven repos,
-including http://conjars.org
+To build multitool with [gradle](http://gradle.org) do this:
 
-To build a jar,
-
-    $ ant retrieve jar
-
-To test,
-
-    $ ant test
+    $ gradle build
 
 License
 -------

@@ -38,16 +38,16 @@ ext.buildDate = new SimpleDateFormat( "yyyyMMdd" ).format( new Date() )
 ext.finalJarName = "${rootProject.name}-${buildDate}.jar"
 ext.finalTarName = "${rootProject.name}-${buildDate}.tgz"
 ext.assemblyDirName = "build/assemble"
-ext.hadoopVersion = "1.0.4"
+ext.hadoopVersion = "1.1.2"
 
 ext.cascadingVersion = '2.2.0-+'
 
 // set property to use locally installed cascading builds
 // otherwise wip releases will be pulled from conjars
-if( System.properties[ 'multitool.release.local' ] )
+if( System.properties[ 'multitool.release.local' ] ) 
   cascadingVersion = '2.2.0-wip-dev'
 
-repositories {
+repositories{
   mavenLocal()
   mavenCentral()
   mavenRepo name: 'conjars', url: 'http://conjars.org/repo/'
@@ -85,7 +85,6 @@ jar {
     }
     if( !System.properties[ 'multitool.release.final' ] )
       from "${buildDir}/build.number.properties"
-
   }
   doFirst {
     into( 'lib' ) {
