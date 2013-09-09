@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2011 Concurrent, Inc.
+# Copyright (c) 2013 Concurrent, Inc.
 
 if [ -z "$MT_PATH" ]
 then
@@ -47,5 +47,12 @@ multitool_run ()
   
   route_perform $extracted_opts
 }
+PLATFORM=${MULTITOOL_PLATFORM:-hadoop}
 
-multitool_run $@
+if [ "$PLATFORM" == "local" ]; then
+    multitool_run --local $@
+else
+   multitool_run $@
+fi
+
+

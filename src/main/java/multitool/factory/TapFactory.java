@@ -22,6 +22,7 @@ package multitool.factory;
 
 import java.util.Map;
 
+import multitool.Main;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 
@@ -35,7 +36,7 @@ public abstract class TapFactory extends Factory
     super( alias );
     }
 
-  public abstract Tap getTap( String value, Map<String, String> params );
+  public abstract Tap getTap( String value, Map<String, String> params, Main.PLATFORM mode );
 
   public abstract Pipe addAssembly( String value, Map<String, String> subParams, Pipe pipe );
   }

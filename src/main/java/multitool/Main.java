@@ -20,8 +20,6 @@
 
 package multitool;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -60,9 +58,10 @@ import org.apache.hadoop.io.compress.GzipCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cascading.cascade.Cascade;
 import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
 import cascading.flow.hadoop.HadoopFlowConnector;
+import cascading.flow.local.LocalFlowConnector;
 import cascading.flow.planner.PlannerException;
 import cascading.pipe.Pipe;
 import cascading.property.AppProps;
@@ -73,28 +72,37 @@ import cascading.tap.Tap;
  */
 public class Main
   {
+
+  public enum PLATFORM
+    {
+    HADOOP, LOCAL
+    }
+
   private static final Logger LOG = LoggerFactory.getLogger( Main.class );
 
-  private static final String DEFAULT_JOB_NAME = "multitool";
-  
   /** Factories for cascading taps. */
-  static TapFactory[] TAP_FACTORIES = new TapFactory[]{new SourceFactory( "source" ), new SinkFactory( "sink" )};
+  static TapFactory[] TAP_FACTORIES = new TapFactory[]{ new SourceFactory( "source" ), new SinkFactory( "sink" ) };
 
   /** Factories foor cascading pipes. */
-  static PipeFactory[] PIPE_FACTORIES = new PipeFactory[]{new RejectFactory( "reject" ), new SelectFactory( "select" ),
-                                                          new CutFactory( "cut" ), new ParserFactory( "parse" ),
-                                                          new RetainFactory( "retain" ),
-                                                          new DiscardFactory( "discard" ),
-                                                          new ParserGenFactory( "pgen" ),
-                                                          new ReplaceFactory( "replace" ),
-                                                          new GroupByFactory( "group" ), new CoGroupFactory( "join" ),
-                                                          new ConcatFactory( "concat" ),
-                                                          new GenFactory( "gen" ), new CountFactory( "count" ),
-                                                          new SumFactory( "sum" ), new ExpressionFactory( "expr" ),
-                                                          new SelectExpressionFactory( "sexpr" ),
-                                                          new DebugFactory( "debug" ),
-                                                          new FileNameFactory( "filename" ),
-                                                          new UniqueFactory( "unique" )};
+  static PipeFactory[] PIPE_FACTORIES = new PipeFactory[]{ new RejectFactory( "reject" ),
+                                                           new SelectFactory( "select" ),
+                                                           new CutFactory( "cut" ),
+                                                           new ParserFactory( "parse" ),
+                                                           new RetainFactory( "retain" ),
+                                                           new DiscardFactory( "discard" ),
+                                                           new ParserGenFactory( "pgen" ),
+                                                           new ReplaceFactory( "replace" ),
+                                                           new GroupByFactory( "group" ),
+                                                           new CoGroupFactory( "join" ),
+                                                           new ConcatFactory( "concat" ),
+                                                           new GenFactory( "gen" ),
+                                                           new CountFactory( "count" ),
+                                                           new SumFactory( "sum" ),
+                                                           new ExpressionFactory( "expr" ),
+                                                           new SelectExpressionFactory( "sexpr" ),
+                                                           new DebugFactory( "debug" ),
+                                                           new FileNameFactory( "filename" ),
+                                                           new UniqueFactory( "unique" ) };
 
   static Map<String, Factory> factoryMap = new HashMap<String, Factory>();
   static Map<String, Option> optionMap = new HashMap<String, Option>();
@@ -104,9 +112,9 @@ public class Main
     optionMap.put( "-h", new Option( "-h", false, null ) );
     optionMap.put( "--help", new Option( "--help", false, null ) );
     optionMap.put( "--markdown", new Option( "--markdown", false, null ) );
+    optionMap.put( "--local", new Option( "--markdown", false, null ) );
     optionMap.put( "--dot", new Option( "--dot", true, null ) );
     optionMap.put( "--appname", new Option( "--appname", true, null ) );
-
 
     for( Factory factory : TAP_FACTORIES )
       {
@@ -124,6 +132,8 @@ public class Main
   private Map<String, String> options;
   private List<String[]> params;
 
+  private PLATFORM platform;
+
   public static void main( String[] args )
     {
 
@@ -138,13 +148,13 @@ public class Main
         String argVerb = arg;
         String argData = null;
 
-        int equals_index = arg.indexOf( "=" );
+        int equalsIndex = arg.indexOf( "=" );
 
-        if( equals_index != -1 )
+        if( equalsIndex != -1 )
           {
-          argName = arg.substring( 0, equals_index );
-          argVerb = arg.substring( 0, equals_index );
-          argData = arg.substring( equals_index + 1 );
+          argName = arg.substring( 0, equalsIndex );
+          argVerb = arg.substring( 0, equalsIndex );
+          argData = arg.substring( equalsIndex + 1 );
           }
 
         int dotIndex = argName.indexOf( "." );
@@ -162,7 +172,7 @@ public class Main
         else
           {
           if( optionMap.keySet().contains( argName ) )
-            params.add( new String[]{argVerb, argData} );
+            params.add( new String[]{ argVerb, argData } );
           else
             throw new IllegalArgumentException( "error: incorrect parameter or usage: " + arg );
           }
@@ -170,16 +180,16 @@ public class Main
 
       new Main( options, params ).execute();
       }
-    catch( IllegalArgumentException exception )
+    catch ( IllegalArgumentException exception )
       {
-      System.out.println( exception.getMessage() );
+      System.err.println( exception.getMessage() );
       printUsage( true, false );
       }
     }
 
-  private static void printUsage( boolean is_error, boolean gen_markdown )
+  private static void printUsage( boolean isError, boolean genMarkdown )
     {
-    if( gen_markdown )
+    if( genMarkdown )
       {
       System.out.println( "Multitool - Command Line Reference" );
       System.out.println( "==================================" );
@@ -199,27 +209,28 @@ public class Main
       System.out.println( "first tap must be a 'source' and last tap must be a 'sink'" );
       }
 
-    printSubHeading( gen_markdown, "options:" );
-    printTableRow( gen_markdown, "-h|--help", "show this help text" );
-    printTableRow( gen_markdown, "--markdown", "generate help text as GitHub Flavored Markdown" );
-    printTableRow( gen_markdown, "--appname=name", "set cascading application name" );
-    printTableRow( gen_markdown, "--dot=filename", "write a plan DOT file, then exit" );
-    printSubHeading( gen_markdown, "taps:" );
-    printFactoryUsage( gen_markdown, TAP_FACTORIES );
-    printSubHeading( gen_markdown, "operations:" );
-    printFactoryUsage( gen_markdown, PIPE_FACTORIES );
+    printSubHeading( genMarkdown, "options:" );
+    printTableRow( genMarkdown, "-h|--help", "show this help text" );
+    printTableRow( genMarkdown, "--markdown", "generate help text as GitHub Flavored Markdown" );
+    printTableRow( genMarkdown, "--appname=name", "set cascading application name" );
+    printTableRow( genMarkdown, "--local", "use cascading local mode" );
+    printTableRow( genMarkdown, "--dot=filename", "write a plan DOT file, then exit" );
+    printSubHeading( genMarkdown, "taps:" );
+    printFactoryUsage( genMarkdown, TAP_FACTORIES );
+    printSubHeading( genMarkdown, "operations:" );
+    printFactoryUsage( genMarkdown, PIPE_FACTORIES );
 
-    if( gen_markdown )
+    if( genMarkdown )
       System.out.println( "</table>" );
 
     System.out.println( "" );
 
-    if( !gen_markdown )
+    if( !genMarkdown )
       printCascadingVersion();
 
     printLicense();
 
-    if( is_error )
+    if( isError )
       System.exit( 1 );
     else
       System.exit( 0 );
@@ -227,36 +238,7 @@ public class Main
 
   private static void printCascadingVersion()
     {
-    try
-      {
-      Properties versionProperties = new Properties();
-
-      InputStream stream = Cascade.class.getClassLoader().getResourceAsStream( "cascading/version.properties" );
-      versionProperties.load( stream );
-
-      stream = Cascade.class.getClassLoader().getResourceAsStream( "cascading/build.number.properties" );
-      if( stream != null )
-        versionProperties.load( stream );
-
-      String releaseMajor = versionProperties.getProperty( "cascading.release.major" );
-      String releaseMinor = versionProperties.getProperty( "cascading.release.minor", null );
-      String releaseBuild = versionProperties.getProperty( "cascading.build.number", null );
-      String releaseFull = null;
-
-      if( releaseMinor == null )
-        releaseFull = releaseMajor;
-      else if( releaseBuild == null )
-        releaseFull = String.format( "%s.%s", releaseMajor, releaseMinor );
-      else
-        releaseFull = String.format( "%s.%s%s", releaseMajor, releaseMinor, releaseBuild );
-
-
-      System.out.println( String.format( "Using Cascading %s\n", releaseFull ) );
-      }
-    catch( IOException exception )
-      {
-      System.out.println( "Unknown Cascading Version\n" );
-      }
+    System.out.println( String.format( "Using Cascading %s\n", cascading.util.Version.getReleaseFull() ) );
     }
 
   private static void printLicense()
@@ -264,28 +246,28 @@ public class Main
     System.out.println( "This release is licensed under the Apache Software License 2.0.\n" );
     }
 
-  private static void printFactoryUsage( boolean gen_markdown, Factory[] factories )
+  private static void printFactoryUsage( boolean genMarkdown, Factory[] factories )
     {
     for( Factory factory : factories )
       {
-      printTableRow( gen_markdown, factory.getAlias(), factory.getUsage() );
+      printTableRow( genMarkdown, factory.getAlias(), factory.getUsage() );
 
       for( String[] strings : factory.getParametersAndUsage() )
-        printTableRow( gen_markdown, strings[ 0 ], strings[ 1 ] );
+        printTableRow( genMarkdown, strings[ 0 ], strings[ 1 ] );
       }
     }
 
-  private static void printSubHeading( boolean gen_markdown, String line )
+  private static void printSubHeading( boolean genMarkdown, String line )
     {
-    if( gen_markdown )
+    if( genMarkdown )
       System.out.println( String.format( "<tr><th>%s</th></tr>", line ) );
     else
       System.out.println( String.format( "\n%s", line ) );
     }
 
-  private static void printTableRow( boolean gen_markdown, String option, String description )
+  private static void printTableRow( boolean genMarkdown, String option, String description )
     {
-    if( gen_markdown )
+    if( genMarkdown )
       System.out.println( String.format( "<tr><td><code>%s</code></td><td>%s</td></tr>", option, description ) );
     else
       System.out.println( String.format( "  %-25s  %s", option, description ) );
@@ -307,6 +289,8 @@ public class Main
       printUsage( false, options.containsKey( "--markdown" ) );
     else
       validateParams();
+
+    this.platform = options.containsKey( "--local" ) ? PLATFORM.LOCAL : PLATFORM.HADOOP;
     }
 
   private void validateParams()
@@ -331,33 +315,33 @@ public class Main
     Properties properties = new Properties();
 
     AppProps.setApplicationJarClass( properties, Main.class );
-
-    properties.setProperty( "mapred.output.compression.codec", GzipCodec.class.getName() );
-    properties.setProperty( "mapred.child.java.opts", "-server -Xmx512m" );
-    properties.setProperty( "mapred.reduce.tasks.speculative.execution", "false" );
-    properties.setProperty( "mapred.map.tasks.speculative.execution", "false" );
-
+    if( platform == PLATFORM.HADOOP )
+      {
+      properties.setProperty( "mapred.output.compression.codec", GzipCodec.class.getName() );
+      properties.setProperty( "mapred.child.java.opts", "-server -Xmx512m" );
+      properties.setProperty( "mapred.reduce.tasks.speculative.execution", "false" );
+      properties.setProperty( "mapred.map.tasks.speculative.execution", "false" );
+      }
     AppProps.addApplicationFramework( properties, Version.MULTITOOL + ":" + Version.getReleaseFull() );
 
     return properties;
     }
 
-
-
   @SuppressWarnings("rawtypes")
   public void execute()
     {
+    Version.printBanner();
+
     String dotKey = "--dot";
 
     try
       {
       Flow flow = plan( getDefaultProperties() );
-      Version.printBanner();
       if( options.containsKey( dotKey ) )
         {
-        String dot_file = options.get( dotKey );
-        flow.writeDOT( dot_file );
-        System.out.println( "wrote DOT file to: " + dot_file );
+        String dotFile = options.get( dotKey );
+        flow.writeDOT( dotFile );
+        System.out.println( "wrote DOT file to: " + dotFile );
         System.out.println( "exiting" );
         }
       else
@@ -365,7 +349,7 @@ public class Main
         flow.complete();
         }
       }
-    catch( PlannerException exception )
+    catch ( PlannerException exception )
       {
       if( options.containsKey( dotKey ) )
         {
@@ -380,7 +364,7 @@ public class Main
     }
 
   @SuppressWarnings("rawtypes")
-public Flow plan( Properties properties )
+  public Flow plan( Properties properties )
     {
     Map<String, Pipe> pipes = new HashMap<String, Pipe>();
     Map<String, Tap> sources = new HashMap<String, Tap>();
@@ -394,27 +378,29 @@ public Flow plan( Properties properties )
       String[] pair = iterator.next();
       String key = pair[ 0 ];
       String value = pair[ 1 ];
-      LOG.info( "key: {}", key );
+      LOG.debug( "key: {}", key );
       Map<String, String> subParams = getSubParams( key, iterator );
 
       Factory factory = factoryMap.get( key );
 
+      if( !factory.supportsPlatform( platform ) )
+        throw new IllegalArgumentException( String.format( "option '%s' in is incompatible with current mode '%s'", key, platform
+            .toString().toLowerCase() ) );
       if( factory instanceof SourceFactory )
         {
-        Tap tap = ( (TapFactory) factory ).getTap( value, subParams );
+        Tap tap = ( (TapFactory) factory ).getTap( value, subParams, platform );
         currentPipe = ( (TapFactory) factory ).addAssembly( value, subParams, currentPipe );
         sources.put( currentPipe.getName(), tap );
         }
       else if( factory instanceof SinkFactory )
         {
-        sinks.put( currentPipe.getName(), ( (TapFactory) factory ).getTap( value, subParams ) );
+        sinks.put( currentPipe.getName(), ( (TapFactory) factory ).getTap( value, subParams, platform ) );
         currentPipe = ( (TapFactory) factory ).addAssembly( value, subParams, currentPipe );
         }
       else
         {
         currentPipe = ( (PipeFactory) factory ).addAssembly( value, subParams, pipes, currentPipe );
         }
-
       pipes.put( currentPipe.getName(), currentPipe );
       }
 
@@ -425,10 +411,16 @@ public Flow plan( Properties properties )
       throw new IllegalArgumentException( "error: must have one sink" );
 
     String appnameOption = "--appname";
-    if (optionMap.containsKey( appnameOption ))
-      AppProps.setApplicationName( properties, options.get( appnameOption ));
-    
-    return new HadoopFlowConnector( properties ).connect( "multitool", sources, sinks, currentPipe );
+    if( optionMap.containsKey( appnameOption ) )
+      AppProps.setApplicationName( properties, options.get( appnameOption ) );
+
+    FlowConnector connector;
+    if( platform == PLATFORM.HADOOP )
+      connector = new HadoopFlowConnector( properties );
+    else
+      connector = new LocalFlowConnector( properties );
+
+    return connector.connect( "multitool", sources, sinks, currentPipe );
     }
 
   private Map<String, String> getSubParams( String key, ListIterator<String[]> iterator )

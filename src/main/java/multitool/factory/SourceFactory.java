@@ -22,6 +22,8 @@ package multitool.factory;
 
 import java.util.Map;
 
+import multitool.Main;
+import multitool.Main.PLATFORM;
 import cascading.operation.Identity;
 import cascading.operation.expression.ExpressionFilter;
 import cascading.pipe.Each;
@@ -32,10 +34,11 @@ import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.hadoop.TextLine;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
+import cascading.tap.local.FileTap;
 import cascading.tuple.Fields;
 
 /**
- *
+ * Factory for data sources.
  */
 public class SourceFactory extends TapFactory
   {
@@ -44,7 +47,7 @@ public class SourceFactory extends TapFactory
     super( alias );
     }
 
-  public Tap getTap( String value, Map<String, String> params )
+  public Tap getTap( String value, Map<String, String> params, Main.PLATFORM platform )
     {
     String numFields = getString( params, "seqfile", "" );
 
@@ -52,19 +55,37 @@ public class SourceFactory extends TapFactory
       {
       String delim = getString( params, "delim", "\t" );
       boolean hasHeader = getBoolean( params, "hasheader" );
-      Scheme scheme = new TextDelimited( Fields.ALL, null, hasHeader, hasHeader, delim );
-      return new Hfs( scheme, value );
+      if( platform == PLATFORM.HADOOP )
+        {
+        Scheme scheme = new TextDelimited( Fields.ALL, null, hasHeader, hasHeader, delim );
+        return new Hfs( scheme, value );
+        }
+      else
+        {
+        Scheme scheme = new cascading.scheme.local.TextDelimited( Fields.ALL, hasHeader, hasHeader, delim );
+        return new cascading.tap.local.FileTap( scheme, value );
+        }
       }
     else if( containsKey( params, "seqfile" ) || numFields.equalsIgnoreCase( "true" ) )
-      return new Hfs( new SequenceFile( Fields.ALL ), value );
+      if( platform == PLATFORM.HADOOP )
+        return new Hfs( new SequenceFile( Fields.ALL ), value );
+      else
+        throw new IllegalArgumentException( "cannot use sequence files in local mode" );
 
     else if( numFields == null || numFields.isEmpty() )
-      return new Hfs( new TextLine( Fields.size( 2 ) ), value );
+      {
+      if( platform == PLATFORM.HADOOP )
+        return new Hfs( new TextLine( Fields.size( 2 ) ), value );
+      else
+        return new FileTap( new cascading.scheme.local.TextLine( Fields.size( 2 ) ), value );
+      }
     else
       {
       int size = Integer.parseInt( numFields );
-
-      return new Hfs( new SequenceFile( Fields.size( size ) ), value );
+      if( platform == PLATFORM.HADOOP )
+        return new Hfs( new SequenceFile( Fields.size( size ) ), value );
+      else
+        return new FileTap( new cascading.scheme.local.TextLine( Fields.size( size ) ), value );
       }
     }
 
@@ -97,17 +118,13 @@ public class SourceFactory extends TapFactory
 
   public String[] getParameters()
     {
-    return new String[]{"name", "skipheader", "hasheader", "delim", "seqfile"};
+    return new String[]{ "name", "skipheader", "hasheader", "delim", "seqfile" };
     }
 
   public String[] getParametersUsage()
     {
-    return new String[]{
-      "name of this source, required if more than one",
-      "set true if the first line should be skipped",
-      "set true if the first line should be used for field names",
-      "delimiter used to separate fields",
-      "read from a sequence file instead of text; specify N fields, or 'true'"
-    };
+    return new String[]{ "name of this source, required if more than one", "set true if the first line should be skipped",
+        "set true if the first line should be used for field names", "delimiter used to separate fields",
+        "read from a sequence file instead of text; specify N fields, or 'true'" };
     }
   }

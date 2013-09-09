@@ -23,6 +23,8 @@ package multitool.factory;
 import java.io.Serializable;
 import java.util.Map;
 
+import multitool.Main;
+import multitool.Main.PLATFORM;
 import cascading.tuple.Fields;
 
 /**
@@ -135,5 +137,17 @@ public abstract class Factory implements Serializable
     String replace = params.get( key );
 
     return replace != null ? replace : defaultValue;
+    }
+  
+  /***
+   * Determines if the factory supports the given {@link PLATFORM}. The default
+   * is <code>true</code>.
+   * 
+   * @param platform The platform, which is used by multitool.
+   * @return <code>true</code> or <code>false</code>
+   */
+  public boolean supportsPlatform( Main.PLATFORM platform )
+    {
+    return true;
     }
   }

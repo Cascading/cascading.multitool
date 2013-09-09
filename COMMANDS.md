@@ -11,6 +11,7 @@ first tap must be a <code>source</code> and last tap must be a <code>sink</code>
 <tr><td><code>-h|--help</code></td><td>show this help text</td></tr>
 <tr><td><code>--markdown</code></td><td>generate help text as GitHub Flavored Markdown</td></tr>
 <tr><td><code>--appname=name</code></td><td>set cascading application name</td></tr>
+<tr><td><code>--local</code></td><td>use cascading local mode</td></tr>
 <tr><td><code>--dot=filename</code></td><td>write a plan DOT file, then exit</td></tr>
 <tr><th>taps:</th></tr>
 <tr><td><code>source</code></td><td>an url to input data</td></tr>

@@ -83,6 +83,17 @@ If no args are given, a comprehensive list of commands will be
 printed. That list is also available as `COMMANDS.md` in this
 directory.
 
+Modes of Operation
+------------------
+
+Mulitools supports cascading's hadoop and local mode. By default multitool uses
+hadoop mode (for backward comptatibility reasons). You can enable local mode
+either by adding `--local` to the invocation or by setting the environment
+variable `MULTITOOL_PLATFORM` to `local`.
+
+Please not that some functionality is only available on certain platforms. E.g.
+sequence files can only be used with hadoop.
+
 Examples
 --------
 
@@ -91,6 +102,11 @@ For more detailed examples of using Multitool, see also: http://cascading.org/mu
 Copying:
 
     $ ./bin/multitool source=input.txt sink=outputDir
+
+
+Copying in local mode:
+
+    $ ./bin/multitool --local source=input.txt sink=outputDir
 
 Copying while removing the first header line, and overwriting output:
 

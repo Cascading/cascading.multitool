@@ -22,7 +22,9 @@ package multitool.factory;
 
 import java.util.Map;
 
+import multitool.Main.PLATFORM;
 import cascading.flow.FlowProcess;
+import cascading.flow.planner.PlatformInfo;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
@@ -73,6 +75,7 @@ public class FileNameFactory extends PipeFactory
 
   public Pipe addAssembly( String value, Map<String, String> subParams, Map<String, Pipe> pipes, Pipe pipe )
     {
+    
     Fields fields = Fields.ALL;
 
     if( value != null && value.equalsIgnoreCase( "append" ) )
@@ -81,5 +84,13 @@ public class FileNameFactory extends PipeFactory
       fields = Fields.RESULTS;
 
     return new Each( pipe, new FileNameFunction( new Fields( "filename" ) ), fields );
+    }
+  
+  @Override
+  public boolean supportsPlatform( PLATFORM platform )
+    {
+    if (platform == PLATFORM.LOCAL)
+      return false;
+    return true;
     }
   }

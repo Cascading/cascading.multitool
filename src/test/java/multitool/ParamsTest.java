@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2013 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -25,90 +25,57 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import cascading.CascadingTestCase;
+import org.junit.Test;
 
 /**
  *
  */
-public class ParamsTest extends CascadingTestCase
+public class ParamsTest
   {
-  public ParamsTest()
-    {
-    super( "params tests" );
-    }
 
+  @Test(expected = IllegalArgumentException.class)
   public void testBadCommand() throws IOException
     {
     List<String[]> params = new LinkedList<String[]>();
 
-    params.add( new String[]{"source", "path"} );
-    params.add( new String[]{"fudge", "path"} );
-    params.add( new String[]{"sink", "path"} );
-
-    try
-      {
-      new Main( params ).plan( new Properties() );
-      fail( "did not catch out of order params" );
-      }
-    catch( IllegalArgumentException exception )
-      {
-      // ignore
-      }
+    params.add( new String[]{ "source", "path" } );
+    params.add( new String[]{ "fudge", "path" } );
+    params.add( new String[]{ "sink", "path" } );
+    new Main( params ).plan( new Properties() );
     }
 
+  @Test(expected = IllegalArgumentException.class)
   public void testBadSource() throws IOException
     {
     List<String[]> params = new LinkedList<String[]>();
 
-    params.add( new String[]{"fudge", "path"} );
-    params.add( new String[]{"sink", "path"} );
+    params.add( new String[]{ "fudge", "path" } );
+    params.add( new String[]{ "sink", "path" } );
 
-    try
-      {
-      new Main( params ).plan( new Properties() );
-      fail( "did not catch out of order params" );
-      }
-    catch( IllegalArgumentException exception )
-      {
-      // ignore
-      }
+    new Main( params ).plan( new Properties() );
     }
 
+  @Test(expected = IllegalArgumentException.class)
   public void testBadSink() throws IOException
     {
     List<String[]> params = new LinkedList<String[]>();
 
-    params.add( new String[]{"source", "path"} );
-    params.add( new String[]{"fudge", "path"} );
+    params.add( new String[]{ "source", "path" } );
+    params.add( new String[]{ "fudge", "path" } );
 
-    try
-      {
-      new Main( params ).plan( new Properties() );
-      fail( "did not catch out of order params" );
-      }
-    catch( IllegalArgumentException exception )
-      {
-      // ignore
-      }
+    new Main( params ).plan( new Properties() );
     }
 
+  @Test(expected = IllegalArgumentException.class)
   public void testSubsWrongOrder() throws IOException
     {
     List<String[]> params = new LinkedList<String[]>();
 
-    params.add( new String[]{"source", "path"} );
-    params.add( new String[]{"sink", "path"} );
-    params.add( new String[]{"source.skipheader", "true"} );
-    params.add( new String[]{"sink.replace", "true"} );
+    params.add( new String[]{ "source", "path" } );
+    params.add( new String[]{ "sink", "path" } );
+    params.add( new String[]{ "source.skipheader", "true" } );
+    params.add( new String[]{ "sink.replace", "true" } );
 
-    try
-      {
-      new Main( params ).plan( new Properties() );
-      fail( "did not catch out of order params" );
-      }
-    catch( IllegalArgumentException exception )
-      {
-      // ignore
-      }
+    new Main( params ).plan( new Properties() );
     }
   }

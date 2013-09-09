@@ -17,23 +17,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package multitool.factory;
 
-import java.util.Map;
+import static org.junit.Assert.*;
+import multitool.Main.PLATFORM;
 
-import cascading.pipe.Pipe;
+import org.junit.Test;
 
-/**
- * Super class for all factories operating on pipes.
- */
-public abstract class PipeFactory extends Factory
+public class FileNameFactoryTest
   {
-  protected PipeFactory( String alias )
+  @Test
+  public void testSupportsPlatformLocal()
     {
-    super( alias );
+    assertFalse( new FileNameFactory( "filename" ).supportsPlatform( PLATFORM.LOCAL ) );
     }
 
-  public abstract Pipe addAssembly( String value, Map<String, String> subParams, Map<String, Pipe> pipes, Pipe pipe );
-
+  @Test
+  public void testSupportsPlatformHadoop()
+    {
+    assertTrue( new FileNameFactory( "filename" ).supportsPlatform( PLATFORM.HADOOP ) );
+    }
   }
