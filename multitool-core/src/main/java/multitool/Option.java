@@ -18,4 +18,34 @@
  * limitations under the License.
  */
 
-apply from: "${rootDir}/etc/testing.gradle"
+package multitool;
+
+/**
+ *
+ */
+public class Option
+  {
+  String name;
+  boolean needsData;
+
+  public Option( String name, boolean needsData )
+    {
+    this.name = name;
+    this.needsData = needsData;
+    }
+
+  public boolean needsData()
+    {
+    return this.needsData;
+    }
+
+  public boolean isValid( String argVerb, String argData )
+    {
+    if( needsData() && ( argData == null ) )
+      return false;
+    else if( !needsData() && ( argData != null ) )
+      return false;
+    else
+      return true;
+    }
+  }

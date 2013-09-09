@@ -1,0 +1,78 @@
+CLI Options Reference
+---------------------
+.Usage:
+
+first tap must be a `source` and last tap must be a `sink`
+
+.Options:
+|============================================================================
+| --selfupdate            |  Installs the latest version of Multitool (only available in the shell wrapper)
+| -h/--help               |  show this help text
+| --markdown              |  generate help text as GitHub Flavored Markdown
+| --appname=name          |  sets cascading application name
+| --platform=name         |  name of the cascading platform to use
+| --version               |  prints the version and exits
+| --dot=filename          |  write a plan DOT file, then exit
+|============================================================================
+
+.Taps:
+|===================================================================================================================
+| sink                    |  an url to output path
+| sink.select             |  fields to sink
+| sink.replace            |  set true if output should be overwritten
+| sink.compress           |  compression: enable, disable, or default
+| sink.writeheader        |  set true to write field names as the first line
+| sink.delim              |  delimiter used to separate fields
+| sink.seqfile            |  write to a sequence file instead of text; writeheader, delim, and compress are ignored
+| source                  |  an url to input data
+| source.name             |  name of this source, required if more than one
+| source.skipheader       |  set true if the first line should be skipped
+| source.hasheader        |  set true if the first line should be used for field names
+| source.delim            |  delimiter used to separate fields
+| source.seqfile          |  read from a sequence file instead of text; specify N fields, or `true`
+|===================================================================================================================
+
+.Operations:
+|==========================================================================================================================
+| gen                     |  split the first field, and return the given result fields as new tuples
+| gen.delim               |  regex delimiter, default: `\t` (TAB)
+| unique                  |  return the first value in each grouping
+| reject                  |  regex, matches are discarded. all fields are matched unless args is specified
+| reject.args             |  fields to match against
+| count                   |  count the number of values in the grouping
+| select                  |  regex, matches are kept. matches against all fields unless args is given
+| select.args             |  fields to match against
+| sexpr                   |  use java expression as filter, e.g. $0 != null
+| sexpr.args              |  the fields to use as arguments
+| sum                     |  sum the values in the grouping
+| pgen                    |  parse the first field with given regex, return as new tuples
+| expr                    |  use java expression as function, e.g. $0.toLowerCase()
+| expr.args               |  the fields to use as arguments
+| debug                   |  print tuples to stdout of task jvm
+| debug.prefix            |  a value to distinguish which branch debug output is coming from
+| join                    |  what fields to join and group on, grouped fields are sorted
+| join.lhs                |  source name of the lhs of the join
+| join.lhs.group          |  lhs fields to group on, default FIRST
+| join.rhs                |  source name of the rhs of the join
+| join.rhs.group          |  rhs fields to group on, default FIRST
+| join.joiner             |  join type: inner, outer, left, right
+| join.name               |  branch name
+| discard                 |  narrow the stream removing the given fields. 0 for first, -1 for last
+| concat                  |  join the given fields, will join ALL by default
+| concat.delim            |  delimiter, default: `\t` (TAB)
+| replace                 |  apply replace the regex
+| replace.replace         |  replacement string
+| replace.replaceAll      |  true if pattern should be applied more than once
+| filename                |  include the filename from which the current value was found (not supported on the local platform)
+| filename.append         |  append the filename to the record (not supported on the local platform)
+| filename.only           |  only return the filename (not supported on the local platform)
+| retain                  |  narrow the stream to the given fields. 0 for first, -1 for last
+| cut                     |  split the first field, and return the given fields, or all fields. 0 for first, -1 for last
+| cut.delim               |  regex delimiter, default: `\t` (TAB)
+| parse                   |  parse the first field with given regex
+| parse.groups            |  regex groups, comma delimited
+| group                   |  what fields to group/sort on, grouped fields are sorted
+| group.secondary         |  fields to secondary sort on
+| group.secondary.reverse |  set true to reverse secondary sort
+|==========================================================================================================================
+

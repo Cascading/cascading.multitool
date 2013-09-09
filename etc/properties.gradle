@@ -39,8 +39,8 @@ if( System.properties[ 'publish.repo.url' ] )
 
 ext.awsAccessId = System.properties[ 'publish.aws.accessId' ]
 ext.awsSecretKey = System.properties[ 'publish.aws.secretKey' ]
-ext.s3Bucket = System.properties[ 'publish.bucket' ]
-ext.s3BucketDocs = System.properties[ 'publish.docs.bucket' ]
+ext.s3Bucket = System.properties[ 'publish.bucket' ] ?: "files.concurrentinc.com"
+ext.s3BucketDocs = System.properties[ 'publish.docs.bucket' ] ?: "docs.cascading.org"
 
 // this one comes from team city
 if( System.properties[ 'build.vcs.number' ] && System.properties[ 'cascading.release.final'] ){ 

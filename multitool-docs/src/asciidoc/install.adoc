@@ -1,0 +1,98 @@
+Installation
+------------
+
+To install the latest version of Multitool do the following:
+
+[subs="attributes"]
+----
+> curl http://{artifactsurl}/multitool/2.5/install-multitool.sh | bash
+----
+
+This script downloads and installs the latest `multitool` shell script into `~/.multitool/` and updates any 
+local `.bashrc` file.
+
+Setting the platform
+~~~~~~~~~~~~~~~~~~~~
+
+As explained above Multitool supports all Cascading platforms. In order for Multitool to work, you have to tell it
+which platform you want to use. Below we see all ways of setting the platform in order of precedence:
+
+The first way of setting the platform is using the `--platform <name>` command line switch. Valid platform names are
+`hadoop`, `hadoop2-mr1` and `local`. The next possibilty is setting the `MULTITOOL_PLATFORM` environment
+variable. If that is not set, Multitool will try to use the `CASCADING_PLATFORM` environment variable. If that is also
+not set, it will look for a file called `.cascading` in the current working directory. The `.cascading` file is a Java
+properties file and can be used to set the platform via the keys `multitool.platform.name` or `cascading.platform.name`.
+If no file is present in the current working directory, multitool will look for a `.cascading` file in the user's
+`$HOME` directory, which may contain the same keys.
+
+The Multitool shell wrapper will chose `hadoop` as the default platform, if none of the above settings can be found.
+
+.Locating your Hadoop.
+****
+If you use the `hadoop` platform Multitool will try to locate the `hadoop` command in your environment by searching the
+`PATH` and by inspecting the `HADOOP_HOME` environment variable. If no usable `hadoop` script can be found, Multitool
+will fail to run. Likewise if you choose to run on the `hadoop2-mr1` platform it tries to locate the `yarn` script that
+ships with Hadoop 2 based distributions. It will look in the `PATH`, the `HADOOP_YARN_HOME` and the `HADOOP_HOME`
+directories.
+
+If you do not have any version of Hadoop installed, you can use the `local` platform and still benefit from the power of
+Multitool and Cascading.
+****
+
+Invocation
+~~~~~~~~~~
+
+The preferred way of running Multitool is using the shell wrapper coming with the distribution:
+
+----
+> multitool param1 param2 .. paramN
+----
+
+It is also possible to download the hadoop and/or hadoop2 jar files compatible with your Hadoop version. This is
+considered an expert mode of using Multitool. If you are unsure, stick with the full client install.
+
+If you choose to work with the jar files directly, you can download them like so:
+
+Hadoop 1:
+
+[subs="attributes"]
+----
+> wget -i http://{artifactsurl}/multitool/2.5/latest-hadoop-jar.txt
+----
+
+To run it do this:
+
+----
+> hadoop jar multitool-hadoop-<version>.jar param1 param2 .. paramN
+----
+
+For Hadoop 2:
+
+[subs="attributes"]
+----
+> wget -i http://{artifactsurl}/multitool/2.5/latest-hadoop2-mr1-jar.txt
+----
+
+To run it do this:
+
+----
+> yarn jar multitool-hadoop2-mr1-<version>.jar param1 param2 .. paramN
+----
+
+****
+Please note that you have to set the platform to a valid value, even if you work with the jar files.
+****
+
+All downloads are hosted on a public S3 bucket, which makes it easy to deploy Multitool in a bootstrap action an Amazon
+EMR cluster.
+
+Update
+------
+
+If you want to update Multitool to the lastest version, you can do that like so:
+
+----
+> multitool --selfupdate
+----
+
+This feature is only available in the shell wrapper and not in the jar files.

@@ -12,3 +12,5 @@ aws.properties
 .settings
 .project
 .classpath
+output
+.idea

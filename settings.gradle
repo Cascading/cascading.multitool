@@ -19,3 +19,10 @@
  */
 
 rootProject.name = 'multitool'
+
+include 'multitool-core'
+include 'multitool-local'
+include 'multitool-hadoop'
+include 'multitool-hadoop2-mr1'
+include 'multitool-platform'
+include 'multitool-docs'

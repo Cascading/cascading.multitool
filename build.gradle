@@ -17,152 +17,176 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.security.MessageDigest
+import java.text.SimpleDateFormat
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
-import java.text.SimpleDateFormat
-
 apply from: 'etc/version.gradle'
 apply from: 'etc/s3Upload.gradle'
+apply from: 'etc/dependencyVersions.gradle'
 
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'idea'
-apply plugin: 'eclipse'
+buildscript {
+  repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url 'http://repo.springsource.org/plugins-release' }
+  }
+  dependencies {
+    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.4'
+    classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1'
 
-apply from: 'etc/providedCompile.gradle'
+  }
+}
+
+// gives 'provided' scope for hadoop
+configure( allprojects ) {
+  apply plugin: 'propdeps'
+  apply plugin: 'propdeps-maven'
+  apply plugin: 'propdeps-idea'
+  apply plugin: 'propdeps-eclipse'
+}
+
 
 ext.buildTimestamp = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" ).format(
         new Date() )
 ext.buildDate = new SimpleDateFormat( "yyyyMMdd" ).format( new Date() )
-ext.finalJarName = "${rootProject.name}-${buildDate}.jar"
-ext.finalTarName = "${rootProject.name}-${buildDate}.tgz"
-ext.assemblyDirName = "build/assemble"
-ext.hadoopVersion = "1.1.2"
 
-ext.cascadingVersion = '2.5.0-+'
+ext.tarBaseName = "${rootProject.name}-${buildDate}"
+ext.finalTarName = "${tarBaseName}.tgz"
+ext.assemblyDirName = "build/assemble"
 
 // set property to use locally installed cascading builds
 // otherwise wip releases will be pulled from conjars
 if( System.properties[ 'cascading.release.local' ] )
-  cascadingVersion = '2.5.0-wip-dev'
+  cascadingVersion = '2.5.1-wip-dev'
 
-repositories{
-  mavenLocal()
-  mavenCentral()
-  mavenRepo name: 'conjars', url: 'http://conjars.org/repo/'
-}
 
-dependencies {
-  compile group: 'cascading', name: 'cascading-core', version: cascadingVersion
-  compile group: 'cascading', name: 'cascading-hadoop', version: cascadingVersion
 
-  testCompile group: 'junit', name: 'junit', version: '4.11'
-  testCompile group: 'cascading', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
-  testCompile( group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion ) {
-    exclude group: 'oro'
+subprojects {
+  ext.jarName = "${project.name}-${buildDate}.jar"
+  apply plugin: 'java'
+  apply plugin: 'maven'
+  apply plugin: 'idea'
+  apply plugin: 'eclipse'
+
+  repositories{
+    mavenLocal()
+    mavenCentral()
+    mavenRepo name: 'conjars', url: 'http://conjars.org/repo/'
   }
-  testCompile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.6.1'
 
-  providedCompile( group: 'org.slf4j', name: 'slf4j-api', version: '1.6.1' )
+  artifacts {
+    archives jar
+  }
 
-  providedCompile( group: 'org.apache.hadoop', name: 'hadoop-core', version: hadoopVersion ) {
-    exclude group: 'ant'
-    exclude group: 'junit'
-    exclude group: 'oro' // causes transient build maven failures, ftw
+  dependencies {
+    testCompile group: 'junit', name: 'junit', version: "4.11"
   }
 }
 
-jar {
-  description = "Assembles a Hadoop ready jar file"
-  archiveName = finalJarName
-  into( "multitool" ) {
-    from( "version.properties" ) {
-      filter( ReplaceTokens, tokens: [
-              'releasedate': "${buildDate}".toString(),
-              'commit': "${commit}".toString()
-      ] )
-    }
-    if( !System.properties[ 'multitool.release.final' ] )
-      from "${buildDir}/build.number.properties"
-  }
-  doFirst {
-    into( 'lib' ) {
-      from configurations.compile
-    }
-  }
 
-  manifest {
-    attributes "Main-Class": "multitool/Main",
-            'Build-Time': "${buildTimestamp}"
-  }
-}
-
-test {
-  maxHeapSize = "756m"
-  systemProperty "hadoop.log.dir", "build/test/log"
-}
-
-task mtTest() << { task ->
-  description = "runs the test suite for the shell script wrapper"
-  Process proc = ["/bin/sh", "src/test/shell/mt/helper/roundup.sh",
-          "src/test/shell/mt/*.sh"].execute()
-  proc.consumeProcessErrorStream( System.err )
-  proc.consumeProcessOutputStream( System.out )
-  if( proc.waitFor() != 0 )
-  {
-    throw new RuntimeException( 'exec failed' )
-  }
-}
-
-task assembleTarballStructure( dependsOn: jar ) << {
+task assembleTarballStructure( ) << {
   def targetDirName = "${assemblyDirName}/${rootProject.name}-${buildDate}"
   copy {
-    from( "bin" )
+    from( "src/main/shell" )
+      filter( ReplaceTokens, tokens: [
+              'location': project.s3Bucket.toString(),
+              'majorVersion': majorVersion.toString()
+      ] ) 
     into( "${targetDirName}/bin" )
   }
   copy {
-    from( "data" )
+    from( "src/main/resources/data" )
     into( "${targetDirName}/data" )
   }
   copy {
     from( "." )
-    include( "apl.txt", "COMMANDS.md", "README.md" )
+    include( "apl.txt", "README.md" )
     into( targetDirName )
   }
   copy {
-    from( "build/libs" )
-    include( finalJarName )
-    into( targetDirName )
+    from( "multitool-local/build/libs" )
+    into( "${targetDirName}/platform/local" )
+  }
+  copy {
+    from( "multitool-hadoop/build/libs" )
+    into( "${targetDirName}/platform/hadoop" )
+  }
+  copy {
+    from( "multitool-hadoop2-mr1/build/libs" )
+    into( "${targetDirName}/platform/hadoop2-mr1" )
   }
 }
 
+assembleTarballStructure.dependsOn([":multitool-hadoop:jar", ":multitool-hadoop2-mr1:jar", ":multitool-local:fatJar"])
+
 task buildTarball( type: Tar, dependsOn: assembleTarballStructure ) {
-  baseName = "${rootProject.name}-${buildDate}"
-  destinationDir = new File( "${s3Upload.source}" )
+  baseName = "${tarBaseName}"
+  destinationDir = new File( "${s3UploadArtifacts.source}" )
   compression = Compression.GZIP
   from( assemblyDirName )
 }
 
-task assembleDist( dependsOn: [buildTarball] ) << {
+task checksums( dependsOn: buildTarball ) << {
+  generateChecksumFiles( buildTarball.archivePath, [ "sha1", "md5" ] )
+}
 
-  file( "${s3Upload.source}/latest.txt" ).write( "http://${s3Upload.destination}${finalTarName}" )
-  file( "${s3Upload.source}/latest-jar.txt" ).write( "http://${s3Upload.destination}${finalJarName}" )
+task assembleDist( dependsOn: checksums ) << {
+  file( "${s3UploadArtifacts.source}/latest.txt" ).write( "http://${s3UploadArtifacts.destination}${finalTarName}" )
+  file( "${s3UploadArtifacts.source}/latest-sha1.txt" ).write( "http://${s3UploadArtifacts.destination}${finalTarName}.sha1" )
+  file( "${s3UploadArtifacts.source}/latest-md5.txt" ).write( "http://${s3UploadArtifacts.destination}${finalTarName}.md5" )
+  file( "${s3UploadArtifacts.source}/latest-hadoop-jar.txt" ).write( "http://${s3UploadArtifacts.destination}${project( 'multitool-hadoop').jarName}" )
+  file( "${s3UploadArtifacts.source}/latest-hadoop2-mr1-jar.txt" ).write( "http://${s3UploadArtifacts.destination}${project( 'multitool-hadoop2-mr1').jarName}" )
   copy {
-    from( "build/libs" )
-    include( finalJarName )
-    into( "${s3Upload.source}" )
+    from ( "multitool-hadoop/build/libs/" )
+    into( "${s3UploadArtifacts.source}" )
+    include( "*jar" )
+  }
+  copy {
+    from ( "multitool-hadoop2-mr1/build/libs/" )
+    into( "${s3UploadArtifacts.source}" )
+    include( "*jar" )
+  }
+  copy {
+    from( "src/main/shell/util/install-multitool.sh" )
+      filter( ReplaceTokens, tokens: [
+              'location': project.s3Bucket.toString(),
+              'majorVersion': majorVersion.toString()
+      ] ) 
+    into( "${s3UploadArtifacts.source}" )
   }
 }
 
-task markdown( dependsOn: jar ) << { task ->
-  description = "updates COMMANDS.md markdown file"
-  Process proc =
-    ["bin/multitool", "--markdown"].execute()
-  proc.consumeProcessErrorStream( System.err )
-  proc.consumeProcessOutputStream( new FileOutputStream( "COMMANDS.md" ) )
-  if( proc.waitFor() != 0 )
-  {
-    throw new RuntimeException( 'exec failed' )
+assembleDist.dependsOn(["build", ":multitool-hadoop:jar", ":multitool-hadoop2-mr1:jar"])
+
+def generateChecksumFiles(filePath, algorithms){
+  def mb = 1024 * 1024
+  def digests = algorithms.collect{ it -> MessageDigest.getInstance( it ) }
+
+  def inputFile = file( filePath )
+  inputFile.eachByte( mb ) { byte[] buf, int bytesRead ->
+    digests.each{ it -> it.update( buf, 0 , bytesRead ) }
+  }
+
+  algorithms.eachWithIndex(){ it, index ->
+    file( "${filePath}.${it}"  ).write(
+        new BigInteger( 1, digests.get( index ).digest() ).toString( 16 ) +
+        "  " + file( filePath ).name + "\n" )
+  }
+}
+
+idea {
+  module {
+    downloadJavadoc = true
+    downloadSources = true
+  }
+}
+
+eclipse {
+  classpath {
+    defaultOutputDir = file( 'build' )
+    downloadSources = true
+    downloadJavadoc = true
   }
 }

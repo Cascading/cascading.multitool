@@ -18,4 +18,22 @@
  * limitations under the License.
  */
 
-apply from: "${rootDir}/etc/testing.gradle"
+package multitool.factory;
+
+import java.util.Map;
+
+import cascading.pipe.Pipe;
+
+/**
+ * Super class for all factories operating on pipes.
+ */
+public abstract class PipeFactory extends Factory
+  {
+  protected PipeFactory( String alias )
+    {
+    super( alias );
+    }
+
+  public abstract Pipe addAssembly( String value, Map<String, String> subParams, Map<String, Pipe> pipes, Pipe pipe );
+
+  }

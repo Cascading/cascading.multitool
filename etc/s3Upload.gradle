@@ -32,7 +32,28 @@ buildscript {
   }
 }
 
-task s3Upload( type: S3Sync ) {
+
+// docs always publish in project root, do need a qualifier like 'javadoc' added
+task s3UploadDocs( type: S3Sync ) {
+
+  accessKey = rootProject.awsAccessId
+  secretKey = rootProject.awsSecretKey
+
+  keepFiles = true // prevents deletion from bucket
+
+  acl ACL.PublicRead
+
+  configFile "${rootProject.projectDir}/etc/synchronizer.properties"
+
+  ext.source = "${buildDir}/documentation"
+
+  ext.destination = "${project.s3BucketDocs}/${rootProject.name}/${majorVersion}/"
+
+  from source
+  into destination
+}
+
+task s3UploadArtifacts( type: S3Sync ) {
 
   accessKey = rootProject.awsAccessId
   secretKey = rootProject.awsSecretKey
@@ -50,3 +71,6 @@ task s3Upload( type: S3Sync ) {
   from source
   into destination
 }
+
+
+task s3Upload (dependsOn: [s3UploadArtifacts, s3UploadDocs]){}
