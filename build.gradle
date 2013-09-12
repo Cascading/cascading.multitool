@@ -20,6 +20,7 @@
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 
 apply from: 'etc/version.gradle'
@@ -149,13 +150,20 @@ task buildTarball( type: Tar, dependsOn: assembleTarballStructure ) {
   from( assemblyDirName )
 }
 
-task assembleDist( dependsOn: [buildTarball] ) << {
+task checksums( dependsOn: buildTarball ) << {
+  generateChecksumFiles( buildTarball.archivePath, [ "sha1", "md5" ] )
+}
 
+task assembleDist( dependsOn: checksums ) << {
   file( "${s3Upload.source}/latest.txt" ).write( "http://${s3Upload.destination}${finalTarName}" )
+  file( "${s3Upload.source}/latest-sha1.txt" ).write( "http://${s3Upload.destination}${finalTarName}.sha1" )
+  file( "${s3Upload.source}/latest-md5.txt" ).write( "http://${s3Upload.destination}${finalTarName}.md5" )
   file( "${s3Upload.source}/latest-jar.txt" ).write( "http://${s3Upload.destination}${finalJarName}" )
   copy {
     from( "build/libs" )
     include( finalJarName )
+    include( "*.sha1" )
+    include( "*.md5" )
     into( "${s3Upload.source}" )
   }
 }
@@ -169,6 +177,22 @@ task markdown( dependsOn: jar ) << { task ->
   if( proc.waitFor() != 0 )
   {
     throw new RuntimeException( 'exec failed' )
+  }
+}
+
+def generateChecksumFiles(filePath, algorithms){
+  def mb = 1024 * 1024
+  def digests = algorithms.collect{ it -> MessageDigest.getInstance( it ) }
+
+  def inputFile = file( filePath )
+  inputFile.eachByte( mb ) { byte[] buf, int bytesRead ->
+    digests.each{ it -> it.update( buf, 0 , bytesRead ) }
+  }
+
+  algorithms.eachWithIndex(){ it, index ->
+    file( "${filePath}.${it}"  ).write(
+        new BigInteger( 1, digests.get( index ).digest() ).toString( 16 ) +
+        "  " + file( filePath ).name + "\n" )
   }
 }
 
