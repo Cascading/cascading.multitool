@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Copyright (c) 2013 Concurrent, Inc.
 
+CURRENT_WORKING_DIRECTORY=$PWD
+
 if [ -z "$MT_PATH" ]
 then
   if [ -h $0 ]
@@ -48,6 +50,9 @@ multitool_run ()
   route_perform $extracted_opts
 }
 PLATFORM=${MULTITOOL_PLATFORM:-hadoop}
+
+# make sure, we are back in the directory, we were invoked from
+cd $CURRENT_WORKING_DIRECTORY
 
 if [ "$PLATFORM" == "local" ]; then
     multitool_run --local $@
