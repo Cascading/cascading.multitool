@@ -40,11 +40,11 @@ ext.finalTarName = "${rootProject.name}-${buildDate}.tgz"
 ext.assemblyDirName = "build/assemble"
 ext.hadoopVersion = "1.1.2"
 
-ext.cascadingVersion = '2.2.0-+'
+ext.cascadingVersion = '2.2.+'
 
 // set property to use locally installed cascading builds
 // otherwise wip releases will be pulled from conjars
-if( System.properties[ 'multitool.release.local' ] ) 
+if( System.properties[ 'multitool.release.local' ] )
   cascadingVersion = '2.2.0-wip-dev'
 
 repositories{
