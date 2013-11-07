@@ -40,12 +40,12 @@ ext.finalTarName = "${rootProject.name}-${buildDate}.tgz"
 ext.assemblyDirName = "build/assemble"
 ext.hadoopVersion = "1.1.2"
 
-ext.cascadingVersion = '2.2.+'
+ext.cascadingVersion = '2.5.0-+'
 
 // set property to use locally installed cascading builds
 // otherwise wip releases will be pulled from conjars
-if( System.properties[ 'multitool.release.local' ] )
-  cascadingVersion = '2.2.0-wip-dev'
+if( System.properties[ 'cascading.release.local' ] )
+  cascadingVersion = '2.5.0-wip-dev'
 
 repositories{
   mavenLocal()
