@@ -86,15 +86,15 @@ MULTITOOL_CLASSPATH=""
 
 case $PLATFORM in
    local)
-       EXEC="$JAVA_EXEC -jar platform/$PLATFORM/*jar"
+       EXEC="$JAVA_EXEC -jar $BASE_DIR/platform/$PLATFORM/*jar"
        ;;
    hadoop)
        source $BIN_DIR/hadoop-env
-       EXEC="$HADOOP_EXEC jar platform/$PLATFORM/*.jar"
+       EXEC="$HADOOP_EXEC jar $BASE_DIR/platform/$PLATFORM/*.jar"
        ;;
    hadoop2mr1)
        source $BIN_DIR/yarn-env
-       EXEC="$YARN_EXEC jar platform/$PLATFORM/*.jar"
+       EXEC="$YARN_EXEC jar $BASE_DIR/platform/$PLATFORM/*.jar"
        ;;
    *)
        echo "ERROR: Unknown platform: $PLATFORM"
