@@ -117,9 +117,14 @@ task assembleTarballStructure( ) << {
     from( "multitool-hadoop2-mr1/build/libs" )
     into( "${targetDirName}/platform/hadoop2-mr1" )
   }
+  copy {
+    from ( "multitool-docs/build/asciidoc" )
+    into( "${targetDirName}/docs" )
+      include( "*.html" )
+    }
 }
 
-assembleTarballStructure.dependsOn([":multitool-hadoop:jar", ":multitool-hadoop2-mr1:jar", ":multitool-local:fatJar"])
+assembleTarballStructure.dependsOn( [":multitool-docs:asciidoctor", ":multitool-hadoop:jar", ":multitool-hadoop2-mr1:jar", ":multitool-local:fatJar" ] )
 
 task buildTarball( type: Tar, dependsOn: assembleTarballStructure ) {
   baseName = "${tarBaseName}"
@@ -158,9 +163,9 @@ task assembleDist( dependsOn: checksums ) << {
   }
 }
 
-assembleDist.dependsOn(["build", ":multitool-hadoop:jar", ":multitool-hadoop2-mr1:jar"])
+assembleDist.dependsOn( [ "build", ":multitool-hadoop:jar", ":multitool-hadoop2-mr1:jar" ] )
 
-def generateChecksumFiles(filePath, algorithms){
+def generateChecksumFiles( filePath, algorithms ){
   def mb = 1024 * 1024
   def digests = algorithms.collect{ it -> MessageDigest.getInstance( it ) }
 
