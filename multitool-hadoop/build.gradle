@@ -20,6 +20,18 @@
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
+buildscript {
+  repositories {
+      mavenCentral()
+  }
+
+  dependencies {
+      classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1'
+  }
+}
+
+apply plugin: 'fatjar'
+
 dependencies {
 
   compile project( ':multitool-core' )
@@ -48,15 +60,12 @@ dependencies {
 
 }
 
-
-jar  {
-  description = "Assembles a Hadoop ready jar file"
-  archiveName = jarName
-  classifier = 'changeme'
-  from sourceSets.main.output
-  
+fatJar {
+  archiveName  = jarName
+  exclude 'META-INF/*.DSA'
+  exclude 'META-INF/LICENSE*'
   into( "multitool" ) {
-    from( "../version.properties" ) {
+    from( "version.properties" ) {
       filter( ReplaceTokens, tokens: [
               'releasedate': "${buildDate}".toString(),
               'commit': "${commit}".toString()
@@ -65,14 +74,13 @@ jar  {
     if( !System.properties[ 'multitool.release.final' ] )
       from "${rootProject.buildDir}/build.number.properties"
   }
+  
   manifest {
     attributes "Main-Class": "multitool/Main",
             'Build-Time': "${buildTimestamp}"
   }
+}
 
-  doFirst {
-    into( 'lib' ) {
-      from( configurations.runtime )
-    }
-  }
+artifacts {
+  archives fatJar
 }

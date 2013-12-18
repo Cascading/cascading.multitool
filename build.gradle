@@ -124,7 +124,7 @@ task assembleTarballStructure( ) << {
     }
 }
 
-assembleTarballStructure.dependsOn( [":multitool-docs:asciidoctor", ":multitool-hadoop:jar", ":multitool-hadoop2-mr1:jar", ":multitool-local:fatJar" ] )
+assembleTarballStructure.dependsOn( [":multitool-docs:asciidoctor", ":multitool-hadoop:fatJar", ":multitool-hadoop2-mr1:fatJar", ":multitool-local:fatJar" ] )
 
 task buildTarball( type: Tar, dependsOn: assembleTarballStructure ) {
   baseName = "${tarBaseName}"

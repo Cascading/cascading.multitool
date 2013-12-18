@@ -31,6 +31,7 @@ buildscript {
 }
 
 apply plugin: 'fatjar'
+
 dependencies {
 
   compile project( ':multitool-core' )
@@ -52,7 +53,7 @@ fatJar {
   archiveName  = jarName
   exclude 'META-INF/*.DSA'
   exclude 'META-INF/LICENSE*'
- into( "multitool" ) {
+  into( "multitool" ) {
     from( "version.properties" ) {
       filter( ReplaceTokens, tokens: [
               'releasedate': "${buildDate}".toString(),
@@ -61,7 +62,7 @@ fatJar {
     }
     if( !System.properties[ 'multitool.release.final' ] )
       from "${rootProject.buildDir}/build.number.properties"
- }
+  }
   
   manifest {
     attributes "Main-Class": "multitool/Main",
