@@ -14,7 +14,6 @@ if [ $# = 0 ]; then
 fi
 
 OPTION=$1
-shift
 if [ "$OPTION" = "--selfupdate" ] ; then
   curl http://@location@/lingual/@majorVersion@/install-multitool.sh | bash
   exit $?
