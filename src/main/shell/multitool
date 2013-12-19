@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Copyright 2011-2013 Concurrent, Inc.
 
-
 function show_usage {
   echo "Type multitool -h for the full help or multitool --selfupdate if you want to install the latest version."
   echo ""
@@ -15,7 +14,7 @@ fi
 
 OPTION=$1
 if [ "$OPTION" = "--selfupdate" ] ; then
-  curl http://@location@/lingual/@majorVersion@/install-multitool.sh | bash
+  curl http://@location@/multitool/@majorVersion@/install-multitool.sh | bash
   exit $?
 fi
 
@@ -107,7 +106,5 @@ MULTITOOL_BASE_DIR=$BASE_DIR
 export MULTITOOL_BIN_DIR
 export MULTITOOL_BASE_DIR
 export MULTITOOL_PLATFORM=$PLATFORM
-if [[ -n $CONFIG ]]; then
-  export LINGUAL_CONFIG=$CONFIG
-fi
+
 ${EXEC} "${ARGS[@]}"
