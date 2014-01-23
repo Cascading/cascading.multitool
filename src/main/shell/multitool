@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright 2011-2013 Concurrent, Inc.
+# Copyright 2011-2014 Concurrent, Inc.
 
 function show_usage {
   echo "Type multitool -h for the full help or multitool --selfupdate if you want to install the latest version."

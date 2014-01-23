@@ -329,7 +329,7 @@ kbd kbd:last-child { margin-right: 0; }
 
 #header br + span { padding-left: 3px; }
 
-#header br + span:before { content: "\2013 \0020"; }
+#header br + span:before { content: "\2014 \0020"; }
 
 #header br + span.author { padding-left: 0; }
 
