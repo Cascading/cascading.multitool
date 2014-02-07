@@ -34,8 +34,8 @@ PLATFORM=""
 CONFIG=""
 CONFIG_FILE=""
 
-CASCADING_CONFIG_FILE=$HOME/.cascading
-LOCAL_CASCADING_CONFIG_FILE=$PWD/.cascading
+CASCADING_CONFIG_FILE=$HOME/.cascading/default.properties
+LOCAL_CASCADING_CONFIG_FILE=$PWD/.cascading/default.properties
 
 if [[ -e $LOCAL_CASCADING_CONFIG_FILE ]]; then
   CONFIG_FILE=$LOCAL_CASCADING_CONFIG_FILE
@@ -90,7 +90,7 @@ case $PLATFORM in
        source $BIN_DIR/hadoop-env
        EXEC="$HADOOP_EXEC jar $BASE_DIR/platform/$PLATFORM/*.jar"
        ;;
-   hadoop2mr1)
+   hadoop2-mr1)
        source $BIN_DIR/yarn-env
        EXEC="$YARN_EXEC jar $BASE_DIR/platform/$PLATFORM/*.jar"
        ;;
