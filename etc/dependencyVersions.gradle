@@ -21,7 +21,7 @@
 /*
  * Dependencies directly related to cascading get versions defined here
  */
-ext.cascadingVersion = '2.5.2-+'
+ext.cascadingVersion = '2.5.2'
 
 // set property to use locally installed cascading builds
 // otherwise wip releases will be pulled from conjars
@@ -63,6 +63,7 @@ ext.unshadeableDependencies = [
         "org.apache.commons.codec.**",
         "org.apache.commons.logging.**",
         "org.jets3t.**",
+        "org.jgrapht.**",
         "META**",
         "org.slf4j.**",
         "org.apache.log4j.**",
