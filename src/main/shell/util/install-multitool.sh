@@ -146,3 +146,18 @@ elif [ -z "`which multitool`" ]; then
 
   echo "To complete installation, add \"${MULTITOOL_HOME}/bin\" to the PATH."
 fi
+
+CASCADING_CONFIG_DIR=$HOME/.cascading
+
+if [[ ! -e  ${CASCADING_CONFIG_DIR} ]]; then
+  mkdir ${CASCADING_CONFIG_DIR}
+fi
+
+CASCADING_CONFIG_FILE=${CASCADING_CONFIG_DIR}/default.properties
+
+HADOOP_MAJOR_VERSION=`hadoop version | grep "Hadoop" | awk '{print $2 }' | awk -F\. '{print $1}'`
+if [[ "2" == $HADOOP_MAJOR_VERSION ]]; then
+  echo 'multitool.platform.name=hadoop2-mr1' >> $CASCADING_CONFIG_FILE
+else
+  echo 'multitool.platform.name=hadoop' >> $CASCADING_CONFIG_FILE
+fi
