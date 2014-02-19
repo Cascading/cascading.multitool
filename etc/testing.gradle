@@ -45,7 +45,8 @@ task platformTest( type: Test, dependsOn: test ) {
   if( System.properties[ 'platformTest.single' ] ) // test a single class from the command line
     include "**/${System.properties[ 'platformTest.single' ]}.class"
   else
-    include '**/*PlatformTest.class'
+    include '**/*RunnerTest.class'
+    include '**/*ParamsTest.class'
 
   jvmArgs '-Xmx756m'
 

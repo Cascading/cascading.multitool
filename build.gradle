@@ -35,7 +35,6 @@ buildscript {
   dependencies {
     classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.4'
     classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1'
-
   }
 }
 
@@ -59,9 +58,7 @@ ext.assemblyDirName = "build/assemble"
 // set property to use locally installed cascading builds
 // otherwise wip releases will be pulled from conjars
 if( System.properties[ 'cascading.release.local' ] )
-  cascadingVersion = '2.5.1-wip-dev'
-
-
+  cascadingVersion = '2.5.3-wip-dev'
 
 subprojects {
   ext.jarName = "${project.name}-${buildDate}.jar"
@@ -73,7 +70,7 @@ subprojects {
   repositories{
     mavenLocal()
     mavenCentral()
-    mavenRepo name: 'conjars', url: 'http://conjars.org/repo/'
+    maven{ url 'http://conjars.org/repo/' }
   }
 
   artifacts {
@@ -93,7 +90,7 @@ task assembleTarballStructure( ) << {
       filter( ReplaceTokens, tokens: [
               'location': project.s3Bucket.toString(),
               'majorVersion': majorVersion.toString()
-      ] ) 
+      ] )
     into( "${targetDirName}/bin" )
   }
   copy {
@@ -106,15 +103,15 @@ task assembleTarballStructure( ) << {
     into( targetDirName )
   }
   copy {
-    from( "multitool-local/build/libs" )
+    from( project ( ":multitool-local" ).fatJar )
     into( "${targetDirName}/platform/local" )
   }
   copy {
-    from( "multitool-hadoop/build/libs" )
+    from( project ( ":multitool-hadoop" ).fatJar )
     into( "${targetDirName}/platform/hadoop" )
   }
   copy {
-    from( "multitool-hadoop2-mr1/build/libs" )
+    from( project ( ":multitool-hadoop2-mr1" ).fatJar )
     into( "${targetDirName}/platform/hadoop2-mr1" )
   }
   copy {
@@ -144,21 +141,19 @@ task assembleDist( dependsOn: checksums ) << {
   file( "${s3UploadArtifacts.source}/latest-hadoop-jar.txt" ).write( "http://${s3UploadArtifacts.destination}${project( 'multitool-hadoop').jarName}" )
   file( "${s3UploadArtifacts.source}/latest-hadoop2-mr1-jar.txt" ).write( "http://${s3UploadArtifacts.destination}${project( 'multitool-hadoop2-mr1').jarName}" )
   copy {
-    from ( "multitool-hadoop/build/libs/" )
+    from ( project( ":multitool-hadoop" ).fatJar )
     into( "${s3UploadArtifacts.source}" )
-    include( "*jar" )
   }
   copy {
-    from ( "multitool-hadoop2-mr1/build/libs/" )
+    from ( project( ":multitool-hadoop2-mr1" ).fatJar )
     into( "${s3UploadArtifacts.source}" )
-    include( "*jar" )
   }
   copy {
     from( "src/main/shell/util/install-multitool.sh" )
       filter( ReplaceTokens, tokens: [
               'location': project.s3Bucket.toString(),
               'majorVersion': majorVersion.toString()
-      ] ) 
+      ] )
     into( "${s3UploadArtifacts.source}" )
   }
 }
