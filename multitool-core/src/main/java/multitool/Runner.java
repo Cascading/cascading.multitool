@@ -160,6 +160,9 @@ public class Runner
     if( options.containsKey( appnameOption ) )
       AppProps.setApplicationName( properties, options.get( appnameOption ) );
 
+    if (options.containsKey( "--tags" ))
+      AppProps.addApplicationTag( properties, options.get( "--tags" ) );
+
     FlowConnector connector = platform.createFlowConnector( properties );
     return connector.connect( "multitool", sources, sinks, currentPipe );
     }

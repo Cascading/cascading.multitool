@@ -10,6 +10,7 @@ first tap must be a `source` and last tap must be a `sink`
 | -h/--help               |  show this help text
 | --markdown              |  generate help text as GitHub Flavored Markdown
 | --appname=name          |  sets cascading application name
+| --tags=comma,separated  |  sets cascading application tags, comma separated
 | --platform=name         |  name of the cascading platform to use
 | --version               |  prints the version and exits
 | --dot=filename          |  write a plan DOT file, then exit

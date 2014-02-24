@@ -63,6 +63,7 @@ public class Main
     optionMap.put( "--platform", new Option( "--platform", true ) );
     optionMap.put( "--dot", new Option( "--dot", true ) );
     optionMap.put( "--appname", new Option( "--appname", true ) );
+    optionMap.put( "--tags", new Option( "--tags", true ) );
     optionMap.put( "--version", new Option( "--version", false ) );
     }
 

@@ -85,6 +85,7 @@ public class HelpPrinter
     printTableRow( "-h|--help", "show this help text" );
     printTableRow( "--markdown", "generate help text as GitHub Flavored Markdown" );
     printTableRow( "--appname=name", "sets cascading application name" );
+    printTableRow( "--tags=comma,separated", "sets cascading application tags, comma separated" );
     printTableRow( "--platform=name", "name of the cascading platform to use" );
     printTableRow( "--version", "prints the version and exits" );
     printTableRow( "--dot=filename", "write a plan DOT file, then exit" );
