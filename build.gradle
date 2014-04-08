@@ -58,7 +58,7 @@ ext.assemblyDirName = "build/assemble"
 // set property to use locally installed cascading builds
 // otherwise wip releases will be pulled from conjars
 if( System.properties[ 'cascading.release.local' ] )
-  cascadingVersion = '2.5.3-wip-dev'
+  cascadingVersion = '2.6.0-wip-dev'
 
 subprojects {
   ext.jarName = "${project.name}-${buildDate}.jar"
