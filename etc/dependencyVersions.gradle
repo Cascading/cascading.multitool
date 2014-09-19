@@ -30,7 +30,7 @@ if( System.properties[ 'multitool.release.local' ] )
 
 ext.hadoopVersion = '1.2.1'
 
-ext.hadoop2Version = '2.3.0'
+ext.hadoop2Version = '2.4.1'
 
 ext.apacheCommonsVersion = '3.1'
 ext.commonsIoVersion = '2.4'

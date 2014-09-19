@@ -5,7 +5,7 @@ To install the latest version of Multitool do the following:
 
 [subs="attributes"]
 ----
-> curl http://{artifactsurl}/multitool/2.5/install-multitool.sh | bash
+> curl http://{artifactsurl}/multitool/{version}/install-multitool.sh | bash
 ----
 
 This script downloads and installs the latest `multitool` shell script into `~/.multitool/` and updates any 
@@ -57,7 +57,7 @@ Hadoop 1:
 
 [subs="attributes"]
 ----
-> wget -i http://{artifactsurl}/multitool/2.5/latest-hadoop-jar.txt
+> wget -i http://{artifactsurl}/multitool/{version}/latest-hadoop-jar.txt
 ----
 
 To run it do this:
@@ -70,7 +70,7 @@ For Hadoop 2:
 
 [subs="attributes"]
 ----
-> wget -i http://{artifactsurl}/multitool/2.5/latest-hadoop2-mr1-jar.txt
+> wget -i http://{artifactsurl}/multitool/{version}/latest-hadoop2-mr1-jar.txt
 ----
 
 To run it do this:

@@ -26,7 +26,7 @@ buildscript {
   }
 
   dependencies {
-      classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1'
+      classpath 'eu.appsatori:gradle-fatjar-plugin:0.2'
   }
 }
 
@@ -43,8 +43,8 @@ dependencies {
   provided group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
 
   testCompile project( ':multitool-platform' ).sourceSets.test.runtimeClasspath
-  testCompile group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version 
-  testCompile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop2Version 
+  testCompile group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version
+  testCompile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop2Version
   testCompile group: 'cascading', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
   testCompile group: 'cascading', name: 'cascading-hadoop2-mr1', version: cascadingVersion, classifier: 'tests', changing: true
   testCompile group: 'cascading', name: 'cascading-platform', version: cascadingVersion, classifier: 'tests', changing: true
@@ -74,7 +74,7 @@ fatJar {
     if( !System.properties[ 'multitool.release.final' ] )
       from "${rootProject.buildDir}/build.number.properties"
   }
-  
+
   manifest {
     attributes "Main-Class": "multitool/Main",
             'Build-Time': "${buildTimestamp}"

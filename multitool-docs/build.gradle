@@ -49,6 +49,7 @@ asciidoctor {
           'data-uri': '',
           imagesdir: "${project.name}/src/site/images/", // should not be relative to rootDir
           artifactsurl: project.s3Bucket,
+          version: rootProject.majorVersion,
           docsurl: project.s3BucketDocs,
           projectroot: project.rootDir,
           analyticsid: System.properties[ 'analytics.id' ],
