@@ -128,19 +128,30 @@ public class Version
   public static Properties loadVersionProperties() throws IOException
     {
     Properties properties = new Properties();
-
     InputStream stream = Version.class.getClassLoader().getResourceAsStream( "multitool/version.properties" );
-
     if( stream == null )
       return properties;
-
-    properties.load( stream );
-
-    stream = Version.class.getClassLoader().getResourceAsStream( "multitool/build.number.properties" );
-
-    if( stream != null )
+    try
+      {
       properties.load( stream );
-
+      }
+    finally
+      {
+      stream.close();
+      }
+    stream = Version.class.getClassLoader().getResourceAsStream( "multitool/build.number.properties" );
+    if( stream != null )
+      {
+      try
+        {
+        properties.load( stream );
+        }
+      finally
+        {
+        stream.close();
+        }
+      }
     return properties;
     }
+
   }

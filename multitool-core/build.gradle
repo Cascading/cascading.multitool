@@ -18,6 +18,8 @@
  * limitations under the License.
  */
 
+import org.apache.tools.ant.filters.ReplaceTokens
+
 dependencies {
   compile group: 'cascading', name: 'cascading-core', version: cascadingVersion, changing: true
 
@@ -45,10 +47,14 @@ jar.doFirst {
 }
 
 jar {
-  into( 'cascading/multitool' ) {
-    from '../version.properties'
-
-    if( !System.properties[ 'lingual.release.final' ] )
+  into( 'multitool' ) {
+    from( '../version.properties' ) {
+        filter( ReplaceTokens, tokens: [
+              'releasedate': "${rootProject.buildDate}".toString(),
+              'commit': "${rootProject.commit}".toString()
+      ] )
+    }
+    if( !System.properties[ 'multitool.release.final' ] )
       from "${buildDir}/build.number.properties"
   }
 }
