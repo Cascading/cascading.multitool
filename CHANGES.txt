@@ -1,0 +1,7 @@
+multitool changes
+
+2.6.0
+
+- fix resource leak in m.u.Version
+- fix build problem causing m.u.Version to not find the version.properties file
+- use Cascading 2.6
