@@ -47,18 +47,12 @@ configure( allprojects ) {
 }
 
 
-ext.buildTimestamp = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" ).format(
-        new Date() )
+ext.buildTimestamp = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" ).format( new Date() )
 ext.buildDate = new SimpleDateFormat( "yyyyMMdd" ).format( new Date() )
 
 ext.tarBaseName = "${rootProject.name}-${buildDate}"
 ext.finalTarName = "${tarBaseName}.tgz"
 ext.assemblyDirName = "build/assemble"
-
-// set property to use locally installed cascading builds
-// otherwise wip releases will be pulled from conjars
-if( System.properties[ 'cascading.release.local' ] )
-  cascadingVersion = '2.6.0-wip-dev'
 
 subprojects {
   ext.jarName = "${project.name}-${buildDate}.jar"
