@@ -22,11 +22,10 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
   repositories {
-      mavenCentral()
+    mavenCentral()
   }
-
   dependencies {
-      classpath 'eu.appsatori:gradle-fatjar-plugin:0.2-rc1'
+    classpath 'eu.appsatori:gradle-fatjar-plugin:0.2'
   }
 }
 
