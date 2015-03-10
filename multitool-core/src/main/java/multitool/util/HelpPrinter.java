@@ -1,31 +1,30 @@
 /*
- * Copyright (c) 2007-2009 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
  * This file is part of the Cascading project.
  *
- * Cascading is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Cascading is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with Cascading.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package multitool.util;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.common.collect.Lists;
 import multitool.factory.Factory;
 import multitool.factory.TapFactory;
 
@@ -91,16 +90,16 @@ public class HelpPrinter
     printTableRow( "--dot=filename", "write a plan DOT file, then exit" );
 
 
-    List<Factory> tapFactories = Lists.newArrayList();
-    List<Factory> operationFactories = Lists.newArrayList();
+    List<Factory> tapFactories = new ArrayList<>();
+    List<Factory> operationFactories = new ArrayList<>();
 
-   for (Factory factory : factories )
-     {
-     if (factory instanceof TapFactory)
-       tapFactories.add(factory);
-     else
-       operationFactories.add( factory );
-     }
+    for( Factory factory : factories )
+      {
+      if( factory instanceof TapFactory )
+        tapFactories.add( factory );
+      else
+        operationFactories.add( factory );
+      }
     printSubHeading( "taps:" );
     printFactoryUsage( tapFactories );
     printSubHeading( "operations:" );
@@ -116,7 +115,6 @@ public class HelpPrinter
 
     printStream.println( "This release is licensed under the Apache Software License 2.0.\n" );
     }
-
 
   private void printFactoryUsage( List<Factory> factories )
     {

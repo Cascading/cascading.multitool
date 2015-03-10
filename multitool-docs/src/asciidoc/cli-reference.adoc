@@ -64,7 +64,7 @@ first tap must be a `source` and last tap must be a `sink`
 | replace                 |  apply replace the regex
 | replace.replace         |  replacement string
 | replace.replaceAll      |  true if pattern should be applied more than once
-| filename                |  include the filename from which the current value was found (not supported on the local platform)
+| filename                |  include the filename from which the current value was found (only on hadoop and hadoop2-mr1 platform)
 | filename.append         |  append the filename to the record (not supported on the local platform)
 | filename.only           |  only return the filename (not supported on the local platform)
 | retain                  |  narrow the stream to the given fields. 0 for first, -1 for last

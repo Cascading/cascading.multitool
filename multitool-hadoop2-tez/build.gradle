@@ -41,7 +41,7 @@ dependencies {
 
   compile project( ':multitool-core' )
 
-  compile group: 'cascading', name: 'cascading-hadoop2-mr1', version: cascadingVersion
+  compile group: 'cascading', name: 'cascading-hadoop2-tez', version: cascadingVersion
 
   provided( group: 'org.apache.hadoop', name: 'hadoop-common', version: hadoop2Version )
   provided( group: 'org.apache.hadoop', name: 'hadoop-client', version: hadoop2Version )
@@ -51,8 +51,22 @@ dependencies {
   testCompile group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: hadoop2Version
   testCompile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoop2Version
   testCompile group: 'cascading', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
-  testCompile group: 'cascading', name: 'cascading-hadoop2-mr1', version: cascadingVersion, classifier: 'tests', changing: true
+  testCompile group: 'cascading', name: 'cascading-hadoop2-tez', version: cascadingVersion, classifier: 'tests', changing: true
   testCompile group: 'cascading', name: 'cascading-platform', version: cascadingVersion, classifier: 'tests', changing: true
+
+  testCompile( group: 'org.apache.tez', name: 'tez-tests', version: tezVersion, classifier: 'tests' ) {
+      exclude group: 'com.google.guava'
+    }
+    testCompile( group: 'org.apache.tez', name: 'tez-api', version: tezVersion ) {
+      exclude group: 'com.google.guava'
+    }
+    testCompile( group: 'org.apache.tez', name: 'tez-dag', version: tezVersion ) {
+      exclude group: 'com.google.guava'
+    }
+    testCompile( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoopVersion ) {
+      exclude group: 'com.google.guava'
+    }
+
 }
 
 fatJar {

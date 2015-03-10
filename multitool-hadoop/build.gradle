@@ -20,6 +20,8 @@
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
+apply from: "${rootDir}/etc/hadoop-shared-config.gradle"
+
 buildscript {
   repositories {
       mavenCentral()
@@ -35,7 +37,7 @@ dependencies {
 
   compile project( ':multitool-core' )
 
-  testCompile project( ':multitool-platform' ).sourceSets.test.runtimeClasspath
+  testCompile project( path: ':multitool-platform', configuration: 'testArtifacts' )
 
   compile group: 'cascading', name: 'cascading-hadoop', version: cascadingVersion, changing: true
 
@@ -55,8 +57,6 @@ dependencies {
   testCompile( group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion ) {
     exclude group: 'oro' // causes transient build maven failures, ftw
   }
-  testCompile group: 'commons-io', name: 'commons-io', version: commonsIoVersion
-
 }
 
 fatJar {

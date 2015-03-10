@@ -46,7 +46,6 @@ configure( allprojects ) {
   apply plugin: 'propdeps-eclipse'
 }
 
-
 ext.buildTimestamp = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" ).format( new Date() )
 ext.buildDate = new SimpleDateFormat( "yyyyMMdd" ).format( new Date() )
 
@@ -67,15 +66,23 @@ subprojects {
     maven{ url 'http://conjars.org/repo/' }
   }
 
+  dependencies {
+    testCompile group: 'junit', name: 'junit', version: "4.12"
+  }
+
+  configurations {
+    testArtifacts
+  }
+  task testJar (type: Jar) {
+    baseName = "${project.name}-test"
+      from sourceSets.test.output
+  }
+
   artifacts {
     archives jar
-  }
-
-  dependencies {
-    testCompile group: 'junit', name: 'junit', version: "4.11"
+    testArtifacts testJar
   }
 }
-
 
 task assembleTarballStructure( ) << {
   def targetDirName = "${assemblyDirName}/${rootProject.name}-${buildDate}"
@@ -109,13 +116,17 @@ task assembleTarballStructure( ) << {
     into( "${targetDirName}/platform/hadoop2-mr1" )
   }
   copy {
+    from( project ( ":multitool-hadoop2-tez" ).fatJar )
+    into( "${targetDirName}/platform/hadoop2-tez" )
+  }
+  copy {
     from ( "multitool-docs/build/asciidoc" )
     into( "${targetDirName}/docs" )
       include( "*.html" )
     }
 }
 
-assembleTarballStructure.dependsOn( [":multitool-docs:asciidoctor", ":multitool-hadoop:fatJar", ":multitool-hadoop2-mr1:fatJar", ":multitool-local:fatJar" ] )
+assembleTarballStructure.dependsOn( [":multitool-docs:asciidoctor", ":multitool-hadoop:fatJar", ":multitool-hadoop2-mr1:fatJar", ":multitool-hadoop2-tez:fatJar", ":multitool-local:fatJar" ] )
 
 task buildTarball( type: Tar, dependsOn: assembleTarballStructure ) {
   baseName = "${tarBaseName}"
@@ -134,12 +145,17 @@ task assembleDist( dependsOn: checksums ) << {
   file( "${s3UploadArtifacts.source}/latest-md5.txt" ).write( "http://${s3UploadArtifacts.destination}${finalTarName}.md5" )
   file( "${s3UploadArtifacts.source}/latest-hadoop-jar.txt" ).write( "http://${s3UploadArtifacts.destination}${project( 'multitool-hadoop').jarName}" )
   file( "${s3UploadArtifacts.source}/latest-hadoop2-mr1-jar.txt" ).write( "http://${s3UploadArtifacts.destination}${project( 'multitool-hadoop2-mr1').jarName}" )
+  file( "${s3UploadArtifacts.source}/latest-hadoop2-tez-jar.txt" ).write( "http://${s3UploadArtifacts.destination}${project( 'multitool-hadoop2-tez').jarName}" )
   copy {
     from ( project( ":multitool-hadoop" ).fatJar )
     into( "${s3UploadArtifacts.source}" )
   }
   copy {
     from ( project( ":multitool-hadoop2-mr1" ).fatJar )
+    into( "${s3UploadArtifacts.source}" )
+  }
+  copy {
+    from ( project( ":multitool-hadoop2-tez" ).fatJar )
     into( "${s3UploadArtifacts.source}" )
   }
   copy {
@@ -152,7 +168,7 @@ task assembleDist( dependsOn: checksums ) << {
   }
 }
 
-assembleDist.dependsOn( [ "build", ":multitool-hadoop:jar", ":multitool-hadoop2-mr1:jar" ] )
+assembleDist.dependsOn( [ "build", ":multitool-hadoop:jar", ":multitool-hadoop2-mr1:jar", ":multitool-hadoop2-tez:jar" ] )
 
 def generateChecksumFiles( filePath, algorithms ){
   def mb = 1024 * 1024

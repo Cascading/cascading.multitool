@@ -18,40 +18,20 @@
  * limitations under the License.
  */
 
-package multitool.platform;
+package multitool;
 
-import java.util.Map;
-import java.util.Properties;
 
-import cascading.flow.FlowConnector;
-import multitool.factory.Factory;
+import java.io.IOException;
 
-/**
- * stub class used for testing.
- */
-public class DummyPlatform implements Platform
+import cascading.flow.Flow;
+import cascading.scheme.hadoop.TextLine;
+import cascading.tap.hadoop.Hfs;
+import cascading.tuple.TupleEntryIterator;
+
+public class Hadoop2TezRunnerTest extends RunnerTest
   {
-  @Override
-  public FlowConnector createFlowConnector( Properties properties )
+  public TupleEntryIterator openTupleEntryIterator( Flow flow, String identifier ) throws IOException
     {
-    return null;
-    }
-
-  @Override
-  public Properties getPlatformProperties()
-    {
-    return null;
-    }
-
-  @Override
-  public Map<String, Factory> getFactories()
-    {
-    return null;
-    }
-
-  @Override
-  public String getName()
-    {
-    return "test-platform";
+    return flow.openTapForRead( new Hfs( new TextLine(), identifier ) );
     }
   }

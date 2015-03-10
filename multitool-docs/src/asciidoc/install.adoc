@@ -18,7 +18,7 @@ As explained above Multitool supports all Cascading platforms. In order for Mult
 which platform you want to use. Below we see all ways of setting the platform in order of precedence:
 
 The first way of setting the platform is using the `--platform <name>` command line switch. Valid platform names are
-`hadoop`, `hadoop2-mr1` and `local`. The next possibilty is setting the `MULTITOOL_PLATFORM` environment
+`hadoop`, `hadoop2-mr1`, `hadoop2-tez` and `local`. The next possibilty is setting the `MULTITOOL_PLATFORM` environment
 variable. If that is not set, Multitool will try to use the `CASCADING_PLATFORM` environment variable. If that is also
 not set, it will look for a file called `.cascading` in the current working directory. The `.cascading` file is a Java
 properties file and can be used to set the platform via the keys `multitool.platform.name` or `cascading.platform.name`.
@@ -31,9 +31,9 @@ The Multitool shell wrapper will chose `hadoop` as the default platform, if none
 ****
 If you use the `hadoop` platform Multitool will try to locate the `hadoop` command in your environment by searching the
 `PATH` and by inspecting the `HADOOP_HOME` environment variable. If no usable `hadoop` script can be found, Multitool
-will fail to run. Likewise if you choose to run on the `hadoop2-mr1` platform it tries to locate the `yarn` script that
-ships with Hadoop 2 based distributions. It will look in the `PATH`, the `HADOOP_YARN_HOME` and the `HADOOP_HOME`
-directories.
+will fail to run. Likewise if you choose to run on the `hadoop2-mr1` or `hadoop2-tez` platform it tries to locate the
+`yarn` script that ships with Hadoop 2 based distributions. It will look in the `PATH`, the `HADOOP_YARN_HOME` and the
+`HADOOP_HOME` directories.
 
 If you do not have any version of Hadoop installed, you can use the `local` platform and still benefit from the power of
 Multitool and Cascading.

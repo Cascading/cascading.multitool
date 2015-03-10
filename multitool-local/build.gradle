@@ -35,7 +35,7 @@ dependencies {
 
   compile project( ':multitool-core' )
 
-  testCompile project( ':multitool-platform' ).sourceSets.test.runtimeClasspath
+  testCompile project( path: ':multitool-platform', configuration: 'testArtifacts' )
 
   compile group: 'cascading', name: 'cascading-local', version: cascadingVersion, changing: true
 

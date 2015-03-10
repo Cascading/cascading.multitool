@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import com.google.common.collect.Lists;
 import multitool.factory.Factory;
 import multitool.platform.Platform;
 import multitool.platform.PlatformLoader;
@@ -198,8 +197,7 @@ public class Main
     if( platformName == null && env.get( CASCADING_PLATFORM ) != null )
       platformName = env.get( CASCADING_PLATFORM );
 
-    List<File> files = Lists.newArrayList( new File( System.getProperty( "user.dir" ) + "/.cascading" ),
-      new File( System.getProperty( "user.home" ) + "/.cascading" ) );
+    File[] files = new File[] { new File( System.getProperty( "user.dir" ) + "/.cascading" ), new File( System.getProperty( "user.home" ) + "/.cascading" ) };
 
     for( File configFile : files )
       {

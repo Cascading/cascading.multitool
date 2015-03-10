@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2012 Concurrent, Inc. All Rights Reserved.
+ * Copyright (c) 2007-2015 Concurrent, Inc. All Rights Reserved.
  *
  * Project and contact information: http://www.cascading.org/
  *
@@ -20,8 +20,13 @@
 
 package multitool;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,12 +37,10 @@ import cascading.flow.Flow;
 import cascading.tuple.TupleEntryIterator;
 import multitool.platform.Platform;
 import multitool.platform.PlatformLoader;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-@SuppressWarnings("rawtypes")
 public abstract class RunnerTest extends PlatformTestCase
   {
   private static final long serialVersionUID = -8498283088222385072L;
@@ -56,7 +59,26 @@ public abstract class RunnerTest extends PlatformTestCase
   @After
   public void tearDown() throws IOException
     {
-    FileUtils.deleteDirectory( new File( outputPath ) );
+    Path path = Paths.get( outputPath );
+    if( Files.exists( path ) )
+      Files.walkFileTree( path, new SimpleFileVisitor<Path>()
+      {
+      @Override
+      public FileVisitResult visitFile( Path file, BasicFileAttributes attrs ) throws IOException
+        {
+        Files.delete( file );
+        return FileVisitResult.CONTINUE;
+        }
+
+      @Override
+      public FileVisitResult postVisitDirectory( Path dir, IOException exc ) throws IOException
+        {
+        Files.delete( dir );
+        return FileVisitResult.CONTINUE;
+        }
+
+      } );
+
     }
 
   @Before
@@ -189,7 +211,7 @@ public abstract class RunnerTest extends PlatformTestCase
     params.add( new String[]{"sink.parts", "0"} );
 
     // this only works in hadoop mode
-    if( "LOCAL".equalsIgnoreCase( getPlatformName() ) )
+    if( getPlatformName().equals( "local" ) || getPlatformName().equals( "hadoop2-tez" ) )
        return;
     else
       {

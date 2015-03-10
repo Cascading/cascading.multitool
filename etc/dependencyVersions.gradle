@@ -21,24 +21,24 @@
 /*
  * Dependencies directly related to cascading get versions defined here
  */
-ext.cascadingVersion = '2.7.0-wip-+'
+ext.cascadingVersion = '3.0.0-wip-+'
 
 // set property to use locally installed cascading builds
 // otherwise wip releases will be pulled from conjars
 if( System.properties[ 'multitool.release.local' ] )
-  ext.cascadingVersion = '2.7.0-wip-dev'
+  ext.cascadingVersion = '3.0.0-wip-dev'
 
 ext.hadoopVersion = '1.2.1'
 
 ext.hadoop2Version = '2.4.1'
 
+ext.tezVersion = '0.5.3'
+
 ext.apacheCommonsVersion = '3.1'
-ext.commonsIoVersion = '2.4'
 ext.commonsLangVersion = '3.1'
-ext.guavaVersion = '15.0.0'
-ext.junitVersion = '4.11'
+ext.junitVersion = '4.12'
 ext.log4jVersion = '1.2.17'
-ext.slf4jVersion = '1.6.1'
+ext.slf4jVersion = '1.7.5'
 
 if( System.properties[ 'hadoop.release.final' ] )
   ext.hadoopVersion = System.properties[ 'hadoop.release.final' ]

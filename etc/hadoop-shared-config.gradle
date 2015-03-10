@@ -18,40 +18,16 @@
  * limitations under the License.
  */
 
-package multitool.platform;
-
-import java.util.Map;
-import java.util.Properties;
-
-import cascading.flow.FlowConnector;
-import multitool.factory.Factory;
-
-/**
- * stub class used for testing.
- */
-public class DummyPlatform implements Platform
-  {
-  @Override
-  public FlowConnector createFlowConnector( Properties properties )
-    {
-    return null;
-    }
-
-  @Override
-  public Properties getPlatformProperties()
-    {
-    return null;
-    }
-
-  @Override
-  public Map<String, Factory> getFactories()
-    {
-    return null;
-    }
-
-  @Override
-  public String getName()
-    {
-    return "test-platform";
+sourceSets {
+  main {
+    java {
+      srcDirs += 'src/main/shared'
     }
   }
+
+  test {
+    java {
+      srcDirs += 'src/test/shared'
+    }
+  }
+}

@@ -1,11 +1,11 @@
 package multitool.platform;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.local.LocalFlowConnector;
-import com.google.common.collect.Maps;
 import multitool.factory.CoGroupFactory;
 import multitool.factory.ConcatFactory;
 import multitool.factory.CountFactory;
@@ -63,7 +63,7 @@ public class LocalPlatform implements Platform
                                                      new DebugFactory( "debug" ),
                                                      //new FileNameFactory( "filename" ),
                                                      new UniqueFactory( "unique" )};
-    Map<String, Factory> factories = Maps.newHashMap();
+    Map<String, Factory> factories = new HashMap<>();
     factories.put( "source", new LocalSourceFactory( "source" ) );
     factories.put( "sink", new LocalSinkFactory( "sink" ) );
     for( PipeFactory pf : pipeFactories )

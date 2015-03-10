@@ -29,6 +29,7 @@ import cascading.scheme.hadoop.TextLine;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
+import cascading.util.Util;
 import multitool.factory.SourceFactory;
 
 /**
@@ -55,10 +56,9 @@ public class HadoopSourceFactory extends SourceFactory
     else if( containsKey( params, "seqfile" ) || numFields.equalsIgnoreCase( "true" ) )
       return new Hfs( new SequenceFile( Fields.ALL ), value );
 
-    else if( numFields == null || numFields.isEmpty() )
-      {
+    else if( Util.isEmpty( numFields ) )
       return new Hfs( new TextLine( Fields.size( 2 ) ), value );
-      }
+
     else
       {
       int size = Integer.parseInt( numFields );
