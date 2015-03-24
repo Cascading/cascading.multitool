@@ -72,3 +72,6 @@ task docDist( type: Copy, dependsOn: asciidoctor ) {
   into "${rootProject.s3UploadDocs.source}/" // intentionally publish to root
   rootProject.s3UploadDocs.dependsOn docDist
 }
+
+
+shadowJar.enabled = false

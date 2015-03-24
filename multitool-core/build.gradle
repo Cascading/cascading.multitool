@@ -34,23 +34,3 @@ dependencies {
   testRuntime group: 'org.slf4j', name: 'slf4j-log4j12', version: "1.6.2"
   testRuntime group: 'log4j', name: 'log4j', version: "1.2.17"
 }
-
-// only performed in this artifact as it is included in all others
-jar.doFirst {
-  if( !System.properties[ 'mulittool.release.final' ] )
-    file( "${buildDir}/build.number.properties" ).write( "lingual.build.number=${buildNumber}" )
-}
-
-jar {
-  into( 'multitool' ) {
-    from( '../version.properties' ) {
-        filter( ReplaceTokens, tokens: [
-              'releasedate': "${rootProject.buildDate}".toString(),
-              'commit': "${rootProject.commit}".toString()
-      ] )
-    }
-    if( !System.properties[ 'multitool.release.final' ] )
-      from "${buildDir}/build.number.properties"
-  }
-}
-

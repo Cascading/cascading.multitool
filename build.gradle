@@ -26,24 +26,19 @@ apply from: 'etc/version.gradle'
 apply from: 'etc/s3Upload.gradle'
 apply from: 'etc/dependencyVersions.gradle'
 
+apply plugin: 'java'
+
 buildscript {
   repositories {
     mavenLocal()
     mavenCentral()
-    maven { url 'http://repo.springsource.org/plugins-release' }
+    jcenter()
+    maven { url 'http://repo.spring.io/plugins-release' }
   }
   dependencies {
-    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.5'
-    classpath 'eu.appsatori:gradle-fatjar-plugin:0.2'
+    classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.1'
+    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
   }
-}
-
-// gives 'provided' scope for hadoop
-configure( allprojects ) {
-  apply plugin: 'propdeps'
-  apply plugin: 'propdeps-maven'
-  apply plugin: 'propdeps-idea'
-  apply plugin: 'propdeps-eclipse'
 }
 
 ext.buildTimestamp = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" ).format( new Date() )
@@ -53,17 +48,27 @@ ext.tarBaseName = "${rootProject.name}-${buildDate}"
 ext.finalTarName = "${tarBaseName}.tgz"
 ext.assemblyDirName = "build/assemble"
 
+configure( subprojects ) {
+  apply plugin: 'propdeps'
+  apply plugin: 'propdeps-maven'
+  apply plugin: 'propdeps-idea'
+  apply plugin: 'propdeps-eclipse'
+}
+
 subprojects {
   ext.jarName = "${project.name}-${buildDate}.jar"
+
   apply plugin: 'java'
   apply plugin: 'maven'
   apply plugin: 'idea'
   apply plugin: 'eclipse'
+  apply plugin: 'com.github.johnrengelman.shadow'
 
   repositories{
     mavenLocal()
     mavenCentral()
     maven{ url 'http://conjars.org/repo/' }
+    maven{ url 'http://oss.sonatype.org/content/repositories/snapshots' }
   }
 
   dependencies {
@@ -80,8 +85,42 @@ subprojects {
 
   artifacts {
     archives jar
+    archives shadowJar
     testArtifacts testJar
   }
+
+  shadowJar {
+    baseName = "${project.name}-${buildDate}"
+    classifier = ''
+    configurations = []
+    
+    from {
+      project.configurations.runtime.minus( [ project.configurations.provided ] )   
+    }
+
+    mergeServiceFiles()
+
+    exclude 'LICENSE'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/LICENSE*'
+
+    into( "multitool" ) {
+      from( "version.properties" ) {
+        filter( ReplaceTokens, tokens: [
+                'releasedate': "${buildDate}".toString(),
+                'commit': "${commit}".toString()
+        ] )
+      }
+      if( !System.properties[ 'multitool.release.final' ] )
+        from "${rootProject.buildDir}/build.number.properties"
+    }
+    
+    manifest {
+      attributes "Main-Class": "multitool/Main",
+                 'Build-Time': "${buildTimestamp}"
+    }
+  }
+
 }
 
 task assembleTarballStructure( ) << {
@@ -104,19 +143,19 @@ task assembleTarballStructure( ) << {
     into( targetDirName )
   }
   copy {
-    from( project ( ":multitool-local" ).fatJar )
+    from( project ( ":multitool-local" ).shadowJar )
     into( "${targetDirName}/platform/local" )
   }
   copy {
-    from( project ( ":multitool-hadoop" ).fatJar )
+    from( project ( ":multitool-hadoop" ).shadowJar )
     into( "${targetDirName}/platform/hadoop" )
   }
   copy {
-    from( project ( ":multitool-hadoop2-mr1" ).fatJar )
+    from( project ( ":multitool-hadoop2-mr1" ).shadowJar )
     into( "${targetDirName}/platform/hadoop2-mr1" )
   }
   copy {
-    from( project ( ":multitool-hadoop2-tez" ).fatJar )
+    from( project ( ":multitool-hadoop2-tez" ).shadowJar )
     into( "${targetDirName}/platform/hadoop2-tez" )
   }
   copy {
@@ -126,7 +165,7 @@ task assembleTarballStructure( ) << {
     }
 }
 
-assembleTarballStructure.dependsOn( [":multitool-docs:asciidoctor", ":multitool-hadoop:fatJar", ":multitool-hadoop2-mr1:fatJar", ":multitool-hadoop2-tez:fatJar", ":multitool-local:fatJar" ] )
+assembleTarballStructure.dependsOn( [":multitool-docs:asciidoctor", subprojects.shadowJar ] )
 
 task buildTarball( type: Tar, dependsOn: assembleTarballStructure ) {
   baseName = "${tarBaseName}"
@@ -147,15 +186,15 @@ task assembleDist( dependsOn: checksums ) << {
   file( "${s3UploadArtifacts.source}/latest-hadoop2-mr1-jar.txt" ).write( "http://${s3UploadArtifacts.destination}${project( 'multitool-hadoop2-mr1').jarName}" )
   file( "${s3UploadArtifacts.source}/latest-hadoop2-tez-jar.txt" ).write( "http://${s3UploadArtifacts.destination}${project( 'multitool-hadoop2-tez').jarName}" )
   copy {
-    from ( project( ":multitool-hadoop" ).fatJar )
+    from ( project( ":multitool-hadoop" ).shadowJar )
     into( "${s3UploadArtifacts.source}" )
   }
   copy {
-    from ( project( ":multitool-hadoop2-mr1" ).fatJar )
+    from ( project( ":multitool-hadoop2-mr1" ).shadowJar )
     into( "${s3UploadArtifacts.source}" )
   }
   copy {
-    from ( project( ":multitool-hadoop2-tez" ).fatJar )
+    from ( project( ":multitool-hadoop2-tez" ).shadowJar )
     into( "${s3UploadArtifacts.source}" )
   }
   copy {
@@ -168,7 +207,7 @@ task assembleDist( dependsOn: checksums ) << {
   }
 }
 
-assembleDist.dependsOn( [ "build", ":multitool-hadoop:jar", ":multitool-hadoop2-mr1:jar", ":multitool-hadoop2-tez:jar" ] )
+assembleDist.dependsOn( [ subprojects.test, subprojects.shadowJar ] )
 
 def generateChecksumFiles( filePath, algorithms ){
   def mb = 1024 * 1024
@@ -183,20 +222,5 @@ def generateChecksumFiles( filePath, algorithms ){
     file( "${filePath}.${it}"  ).write(
         new BigInteger( 1, digests.get( index ).digest() ).toString( 16 ) +
         "  " + file( filePath ).name + "\n" )
-  }
-}
-
-idea {
-  module {
-    downloadJavadoc = true
-    downloadSources = true
-  }
-}
-
-eclipse {
-  classpath {
-    defaultOutputDir = file( 'build' )
-    downloadSources = true
-    downloadJavadoc = true
   }
 }

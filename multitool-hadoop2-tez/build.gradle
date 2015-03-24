@@ -26,17 +26,6 @@ idea {
   pathVariables MODULE_DIR: file( "${rootDir}/multitool-hadoop" )
 }
 
-buildscript {
-  repositories {
-      mavenCentral()
-  }
-  dependencies {
-      classpath 'eu.appsatori:gradle-fatjar-plugin:0.2'
-  }
-}
-
-apply plugin: 'fatjar'
-
 dependencies {
 
   compile project( ':multitool-core' )
@@ -67,19 +56,4 @@ dependencies {
       exclude group: 'com.google.guava'
     }
 
-}
-
-fatJar {
-  archiveName  = jarName
-  exclude 'META-INF/*.DSA'
-  exclude 'META-INF/LICENSE*'
-
-  manifest {
-    attributes "Main-Class": "multitool/Main",
-            'Build-Time': "${buildTimestamp}"
-  }
-}
-
-artifacts {
-  archives fatJar
 }

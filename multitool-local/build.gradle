@@ -20,17 +20,6 @@
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath 'eu.appsatori:gradle-fatjar-plugin:0.2'
-  }
-}
-
-apply plugin: 'fatjar'
-
 dependencies {
 
   compile project( ':multitool-core' )
@@ -46,29 +35,4 @@ dependencies {
   testCompile group: 'cascading', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
   testCompile group: 'cascading', name: 'cascading-local', version: cascadingVersion, classifier: 'tests', changing: true
   testCompile group: 'cascading', name: 'cascading-platform', version: cascadingVersion, classifier: 'tests', changing: true
-}
-
-fatJar {
-  archiveName  = jarName
-  exclude 'META-INF/*.DSA'
-  exclude 'META-INF/LICENSE*'
-  into( "multitool" ) {
-    from( "version.properties" ) {
-      filter( ReplaceTokens, tokens: [
-              'releasedate': "${buildDate}".toString(),
-              'commit': "${commit}".toString()
-      ] )
-    }
-    if( !System.properties[ 'multitool.release.final' ] )
-      from "${rootProject.buildDir}/build.number.properties"
-  }
-  
-  manifest {
-    attributes "Main-Class": "multitool/Main",
-            'Build-Time': "${buildTimestamp}"
-  }
-}
-
-artifacts {
-  archives fatJar
 }

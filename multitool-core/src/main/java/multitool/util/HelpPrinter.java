@@ -27,6 +27,7 @@ import java.util.List;
 
 import multitool.factory.Factory;
 import multitool.factory.TapFactory;
+import multitool.platform.Platform;
 
 /**
  *  Class that encapsulates the printing of the help/markdown creation. It has two different modes PLAIN and MARKDOWN.
@@ -36,6 +37,7 @@ public class HelpPrinter
   {
   private final PrintStream printStream;
   private final Mode mode;
+  private final Platform platform;
 
   /**
    * The help printer has two modes of operation, which are represented by an enum.
@@ -46,11 +48,13 @@ public class HelpPrinter
    * Constructs a new HelpPrinter.
    * @param printStream The stream to write the help to.
    * @param mode  The mode of operation.
+   * @param platform
    */
-  public HelpPrinter( PrintStream printStream, Mode mode )
+  public HelpPrinter( PrintStream printStream, Mode mode, Platform platform )
     {
     this.printStream = printStream;
     this.mode = mode;
+    this.platform = platform;
     }
 
 
@@ -111,7 +115,7 @@ public class HelpPrinter
     printStream.println( "" );
 
     if( mode != Mode.MARKDOWN )
-      printStream.println( String.format( "Using Cascading %s\n", cascading.util.Version.getReleaseFull() ) );
+      printStream.println( String.format( "Using Cascading %s (platform=%s) \n", cascading.util.Version.getReleaseFull(), platform.getName() ) );
 
     printStream.println( "This release is licensed under the Apache Software License 2.0.\n" );
     }

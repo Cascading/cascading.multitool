@@ -26,17 +26,6 @@ idea {
   pathVariables MODULE_DIR: file( "${rootDir}/multitool-hadoop" )
 }
 
-buildscript {
-  repositories {
-      mavenCentral()
-  }
-  dependencies {
-      classpath 'eu.appsatori:gradle-fatjar-plugin:0.2'
-  }
-}
-
-apply plugin: 'fatjar'
-
 dependencies {
 
   compile project( ':multitool-core' )
@@ -53,19 +42,4 @@ dependencies {
   testCompile group: 'cascading', name: 'cascading-core', version: cascadingVersion, classifier: 'tests', changing: true
   testCompile group: 'cascading', name: 'cascading-hadoop2-mr1', version: cascadingVersion, classifier: 'tests', changing: true
   testCompile group: 'cascading', name: 'cascading-platform', version: cascadingVersion, classifier: 'tests', changing: true
-}
-
-fatJar {
-  archiveName  = jarName
-  exclude 'META-INF/*.DSA'
-  exclude 'META-INF/LICENSE*'
-
-  manifest {
-    attributes "Main-Class": "multitool/Main",
-            'Build-Time': "${buildTimestamp}"
-  }
-}
-
-artifacts {
-  archives fatJar
 }

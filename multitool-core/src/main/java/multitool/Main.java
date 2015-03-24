@@ -144,9 +144,9 @@ public class Main
         {
         HelpPrinter printer;
         if( options.containsKey( "--markdown" ) )
-          printer = new HelpPrinter( System.out, HelpPrinter.Mode.MARKDOWN );
+          printer = new HelpPrinter( System.out, HelpPrinter.Mode.MARKDOWN, platform );
         else
-          printer = new HelpPrinter( System.out, HelpPrinter.Mode.PLAIN );
+          printer = new HelpPrinter( System.out, HelpPrinter.Mode.PLAIN,platform );
         printer.printHelp( platform.getFactories().values() );
         System.exit( 1 );
         }
@@ -158,7 +158,7 @@ public class Main
     catch( IllegalArgumentException exception )
       {
       System.err.println( exception.getMessage() );
-      new HelpPrinter( System.out, HelpPrinter.Mode.PLAIN ).printHelp( platform.getFactories().values() );
+      new HelpPrinter( System.out, HelpPrinter.Mode.PLAIN, platform ).printHelp( platform.getFactories().values() );
       System.exit( 1 );
       }
     }

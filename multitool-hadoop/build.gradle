@@ -22,17 +22,6 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 apply from: "${rootDir}/etc/hadoop-shared-config.gradle"
 
-buildscript {
-  repositories {
-      mavenCentral()
-  }
-  dependencies {
-      classpath 'eu.appsatori:gradle-fatjar-plugin:0.2'
-  }
-}
-
-apply plugin: 'fatjar'
-
 dependencies {
 
   compile project( ':multitool-core' )
@@ -57,19 +46,4 @@ dependencies {
   testCompile( group: 'org.apache.hadoop', name: 'hadoop-test', version: hadoopVersion ) {
     exclude group: 'oro' // causes transient build maven failures, ftw
   }
-}
-
-fatJar {
-  archiveName  = jarName
-  exclude 'META-INF/*.DSA'
-  exclude 'META-INF/LICENSE*'
-
-  manifest {
-    attributes "Main-Class": "multitool/Main",
-            'Build-Time': "${buildTimestamp}"
-  }
-}
-
-artifacts {
-  archives fatJar
 }
