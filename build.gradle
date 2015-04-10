@@ -30,14 +30,12 @@ apply plugin: 'java'
 
 buildscript {
   repositories {
-    mavenLocal()
     mavenCentral()
     jcenter()
-    maven { url 'http://repo.spring.io/plugins-release' }
   }
   dependencies {
     classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.1'
-    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
+    classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.1'
   }
 }
 
@@ -48,12 +46,6 @@ ext.tarBaseName = "${rootProject.name}-${buildDate}"
 ext.finalTarName = "${tarBaseName}.tgz"
 ext.assemblyDirName = "build/assemble"
 
-configure( subprojects ) {
-  apply plugin: 'propdeps'
-  apply plugin: 'propdeps-maven'
-  apply plugin: 'propdeps-idea'
-  apply plugin: 'propdeps-eclipse'
-}
 
 subprojects {
   ext.jarName = "${project.name}-${buildDate}.jar"
@@ -62,13 +54,13 @@ subprojects {
   apply plugin: 'maven'
   apply plugin: 'idea'
   apply plugin: 'eclipse'
+  apply plugin: 'provided-base'
   apply plugin: 'com.github.johnrengelman.shadow'
 
   repositories{
     mavenLocal()
     mavenCentral()
     maven{ url 'http://conjars.org/repo/' }
-    maven{ url 'http://oss.sonatype.org/content/repositories/snapshots' }
   }
 
   dependencies {
