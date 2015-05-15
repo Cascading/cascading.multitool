@@ -1,6 +1,7 @@
-multitool changes
+multitool change log
 
 2.7.0 
+
 - use Cascading 2.7
 
 2.6.0
