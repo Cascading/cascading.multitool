@@ -1,6 +1,6 @@
 multitool changes
 
-2.7.0 (unreleased)
+2.7.0 
 - use Cascading 2.7
 
 2.6.0
