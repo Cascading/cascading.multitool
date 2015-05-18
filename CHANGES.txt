@@ -1,10 +1,12 @@
-multitool changes
+multitool change log
 
 3.0.0 (unreleased)
+
 - update to Cascading 3.0
 - added support for Apache Tez
 
-2.7.0 (unreleased)
+2.7.0
+
 - use Cascading 2.7
 
 2.6.0
