@@ -27,7 +27,6 @@ idea {
 }
 
 dependencies {
-
   compile project( ':multitool-core' )
 
   compile group: 'cascading', name: 'cascading-hadoop2-tez', version: cascadingVersion
@@ -43,17 +42,8 @@ dependencies {
   testCompile group: 'cascading', name: 'cascading-hadoop2-tez', version: cascadingVersion, classifier: 'tests', changing: true
   testCompile group: 'cascading', name: 'cascading-platform', version: cascadingVersion, classifier: 'tests', changing: true
 
-  testCompile( group: 'org.apache.tez', name: 'tez-tests', version: tezVersion, classifier: 'tests' ) {
-      exclude group: 'com.google.guava'
-    }
-    testCompile( group: 'org.apache.tez', name: 'tez-api', version: tezVersion ) {
-      exclude group: 'com.google.guava'
-    }
-    testCompile( group: 'org.apache.tez', name: 'tez-dag', version: tezVersion ) {
-      exclude group: 'com.google.guava'
-    }
-    testCompile( group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoopVersion ) {
-      exclude group: 'com.google.guava'
-    }
-
+  testCompile group: 'org.apache.tez', name: 'tez-tests', version: tezVersion, classifier: 'tests'
+  testCompile group: 'org.apache.tez', name: 'tez-api', version: tezVersion
+  testCompile group: 'org.apache.tez', name: 'tez-dag', version: tezVersion
+  testCompile group: 'org.apache.hadoop', name: 'hadoop-minicluster', version: hadoopVersion
 }
